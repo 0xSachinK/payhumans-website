@@ -55,7 +55,7 @@ export default function Hero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
         >
           <a
-            href="#cli"
+            href="/become-lp"
             className="cta-primary px-6 py-3 rounded-lg bg-[var(--accent)] hover:bg-[#2563eb] text-white text-sm font-medium glow-box"
           >
             I&apos;m building an agent
