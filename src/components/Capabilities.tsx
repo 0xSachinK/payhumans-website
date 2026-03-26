@@ -5,7 +5,7 @@ import { CAPABILITIES } from "@/lib/constants";
 
 export default function Capabilities() {
   return (
-    <section id="capabilities" className="py-32 px-6">
+    <section id="capabilities" className="py-20 md:py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">

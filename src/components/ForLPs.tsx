@@ -20,10 +20,10 @@ const points = [
 
 export default function ForLPs() {
   return (
-    <section id="earn" className="py-32 px-6">
+    <section id="earn" className="py-20 md:py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
-          <div className="frost p-10 md:p-20">
+          <div className="frost p-8 md:p-20">
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--green)] font-mono mb-4">
                 For Humans

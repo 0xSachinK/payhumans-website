@@ -32,7 +32,7 @@ peer checkout create --amount 50 --currency USD \\
 
 export default function PeerCLI() {
   return (
-    <section id="cli" className="py-32 px-6">
+    <section id="cli" className="py-20 md:py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
@@ -51,7 +51,7 @@ export default function PeerCLI() {
 
         <div className="grid lg:grid-cols-2 gap-8 items-start">
           <SectionReveal>
-            <CodeBlock title="terminal \u2014 peer-cli">{code}</CodeBlock>
+            <CodeBlock title="peer-cli">{code}</CodeBlock>
           </SectionReveal>
 
           <SectionReveal delay={0.1}>

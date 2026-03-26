@@ -6,7 +6,7 @@ import { FAQ as items } from "@/lib/constants";
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-32 px-6">
+    <section id="faq" className="py-20 md:py-32 px-6">
       <div className="max-w-3xl mx-auto">
         <SectionReveal>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">

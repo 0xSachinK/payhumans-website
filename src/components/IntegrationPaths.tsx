@@ -51,7 +51,7 @@ const cards = [
 
 export default function IntegrationPaths() {
   return (
-    <section className="py-32 px-6">
+    <section className="py-20 md:py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
