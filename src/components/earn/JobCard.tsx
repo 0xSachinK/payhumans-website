@@ -109,7 +109,12 @@ export default function JobCard({
           {job.successRate}% success
         </span>
         <span>{job.totalFulfilled} fulfilled</span>
-        <span className="font-mono">{job.depositor}</span>
+        <span className="flex items-center gap-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3 h-3">
+            <path strokeLinecap="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          {job.estimatedTime}
+        </span>
       </div>
 
       {/* Claim button */}

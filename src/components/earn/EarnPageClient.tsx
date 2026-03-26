@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import EarnSteps from "./EarnSteps";
 import EarnCTA from "./EarnCTA";
+import ExtensionCheck from "./ExtensionCheck";
 import Footer from "@/components/Footer";
 
 const Web3Provider = dynamic(() => import("@/providers/Web3Provider"), {
@@ -20,6 +21,7 @@ export default function EarnPageClient() {
       <EarnNavigation />
       <main>
         <EarnHero />
+        <ExtensionCheck />
         <EarnSteps />
         <JobBoard />
         <EarnCTA />

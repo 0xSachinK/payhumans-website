@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import SectionReveal from "../SectionReveal";
 import JobCard from "./JobCard";
 import ClaimModal from "./ClaimModal";
-import { MOCK_JOBS, PLATFORMS, CURRENCIES, type PaymentJob } from "@/lib/mock-jobs";
+import { MOCK_JOBS, PLATFORMS, CURRENCIES, SORT_OPTIONS, type PaymentJob, type SortOption } from "@/lib/mock-jobs";
 
 export default function JobBoard() {
   const [platform, setPlatform] = useState<string>("All");
   const [currency, setCurrency] = useState<string>("All");
+  const [sort, setSort] = useState<SortOption>("earnings");
   const [claimJob, setClaimJob] = useState<PaymentJob | null>(null);
 
-  const filtered = MOCK_JOBS.filter((j) => {
-    if (platform !== "All" && j.platform !== platform) return false;
-    if (currency !== "All" && j.currency !== currency) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    const jobs = MOCK_JOBS.filter((j) => {
+      if (platform !== "All" && j.platform !== platform) return false;
+      if (currency !== "All" && j.currency !== currency) return false;
+      return true;
+    });
+
+    return jobs.toSorted((a, b) => {
+      if (sort === "earnings") return b.earningsNum - a.earningsNum;
+      if (sort === "newest") return a.createdAtMin - b.createdAtMin;
+      return parseFloat(b.amount.replace(/,/g, "")) - parseFloat(a.amount.replace(/,/g, ""));
+    });
+  }, [platform, currency, sort]);
 
   return (
     <>
@@ -84,6 +93,24 @@ export default function JobBoard() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Sort */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">Sort:</span>
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSort(opt.value)}
+                  className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
+                    sort === opt.value
+                      ? "bg-white/[0.06] text-[var(--fg)] border border-white/[0.1]"
+                      : "text-[var(--muted)] hover:text-[var(--secondary)]"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </SectionReveal>
 

@@ -9,13 +9,24 @@ export interface PaymentJob {
   fiatAmount: string;
   spread: string;
   earnings: string;
+  earningsNum: number;
   intentAmountMin: string;
   intentAmountMax: string;
   successRate: number;
   totalFulfilled: number;
   createdAt: string;
+  createdAtMin: number;
+  estimatedTime: string;
   status: "active" | "claimed";
 }
+
+export type SortOption = "earnings" | "newest" | "amount";
+
+export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "earnings", label: "Highest Earnings" },
+  { value: "newest", label: "Newest First" },
+  { value: "amount", label: "Largest Amount" },
+];
 
 export const PLATFORMS = [
   "All",
@@ -43,11 +54,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "502.50",
     spread: "0.50%",
     earnings: "$2.50",
+    earningsNum: 2.5,
     intentAmountMin: "10",
     intentAmountMax: "500",
     successRate: 98,
     totalFulfilled: 142,
     createdAt: "2m ago",
+    createdAtMin: 2,
+    estimatedTime: "~3 min",
     status: "active",
   },
   {
@@ -61,11 +75,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "1,209.60",
     spread: "0.80%",
     earnings: "$9.60",
+    earningsNum: 9.6,
     intentAmountMin: "50",
     intentAmountMax: "1200",
     successRate: 95,
     totalFulfilled: 87,
     createdAt: "5m ago",
+    createdAtMin: 5,
+    estimatedTime: "~5 min",
     status: "active",
   },
   {
@@ -79,11 +96,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "251.25",
     spread: "0.50%",
     earnings: "$1.25",
+    earningsNum: 1.25,
     intentAmountMin: "10",
     intentAmountMax: "250",
     successRate: 100,
     totalFulfilled: 34,
     createdAt: "8m ago",
+    createdAtMin: 8,
+    estimatedTime: "~3 min",
     status: "active",
   },
   {
@@ -97,11 +117,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "2,014.00",
     spread: "0.70%",
     earnings: "$14.00",
+    earningsNum: 14.0,
     intentAmountMin: "25",
     intentAmountMax: "2000",
     successRate: 92,
     totalFulfilled: 215,
     createdAt: "12m ago",
+    createdAtMin: 12,
+    estimatedTime: "~4 min",
     status: "active",
   },
   {
@@ -115,11 +138,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "804.80",
     spread: "0.60%",
     earnings: "$4.80",
+    earningsNum: 4.8,
     intentAmountMin: "20",
     intentAmountMax: "800",
     successRate: 96,
     totalFulfilled: 63,
     createdAt: "15m ago",
+    createdAtMin: 15,
+    estimatedTime: "~4 min",
     status: "active",
   },
   {
@@ -133,11 +159,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "3,528.50",
     spread: "0.81%",
     earnings: "$28.50",
+    earningsNum: 28.5,
     intentAmountMin: "100",
     intentAmountMax: "3500",
     successRate: 97,
     totalFulfilled: 156,
     createdAt: "18m ago",
+    createdAtMin: 18,
+    estimatedTime: "~6 min",
     status: "active",
   },
   {
@@ -151,11 +180,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "150.45",
     spread: "0.30%",
     earnings: "$0.45",
+    earningsNum: 0.45,
     intentAmountMin: "10",
     intentAmountMax: "150",
     successRate: 100,
     totalFulfilled: 19,
     createdAt: "22m ago",
+    createdAtMin: 22,
+    estimatedTime: "~2 min",
     status: "active",
   },
   {
@@ -169,11 +201,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "5,050.00",
     spread: "1.00%",
     earnings: "$50.00",
+    earningsNum: 50.0,
     intentAmountMin: "100",
     intentAmountMax: "5000",
     successRate: 91,
     totalFulfilled: 44,
     createdAt: "30m ago",
+    createdAtMin: 30,
+    estimatedTime: "~8 min",
     status: "active",
   },
   {
@@ -187,11 +222,14 @@ export const MOCK_JOBS: PaymentJob[] = [
     fiatAmount: "754.50",
     spread: "0.60%",
     earnings: "$4.50",
+    earningsNum: 4.5,
     intentAmountMin: "25",
     intentAmountMax: "750",
     successRate: 94,
     totalFulfilled: 71,
     createdAt: "35m ago",
+    createdAtMin: 35,
+    estimatedTime: "~4 min",
     status: "active",
   },
 ];
