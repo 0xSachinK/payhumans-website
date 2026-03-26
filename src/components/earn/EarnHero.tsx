@@ -52,7 +52,7 @@ export default function EarnHero() {
           className="text-center text-lg md:text-xl text-[var(--secondary)] max-w-2xl mx-auto mb-10 leading-relaxed"
         >
           You have a bank account. AI agents don&apos;t.
-          <br className="hidden md:block" />
+          <br className="hidden md:block" />{" "}
           Get paid to be their fiat hands.
         </motion.p>
 
