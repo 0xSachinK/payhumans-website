@@ -25,13 +25,18 @@ export default function ClaimModal({
     if (isConnected && step === "connect") setStep("claim");
   }, [isConnected, step]);
 
-  // Lock scroll when modal is open
+  // Lock scroll + Escape to close
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEsc);
     return () => {
       document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleEsc);
     };
-  }, []);
+  }, [onClose]);
 
   const stepConfig: Record<Step, { label: string; index: number }> = {
     connect: { label: "Connect", index: 0 },
@@ -60,6 +65,9 @@ export default function ClaimModal({
 
         {/* Modal */}
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Claim payment job"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -69,6 +77,7 @@ export default function ClaimModal({
           {/* Close */}
           <button
             onClick={onClose}
+            aria-label="Close modal"
             className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[var(--muted)] hover:text-[var(--fg)] transition-colors z-10"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { LINKS } from "@/lib/constants";
 
 const links = [
@@ -31,7 +32,7 @@ export default function Navigation() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2.5">
+        <a href="/" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-md bg-[var(--accent)] flex items-center justify-center">
             <span className="text-white font-mono text-xs font-bold">P</span>
           </div>
@@ -41,15 +42,25 @@ export default function Navigation() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-            >
-              {l.label}
-            </a>
-          ))}
+          {links.map((l) =>
+            l.href.startsWith("/") ? (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <a
+                key={l.href}
+                href={l.href}
+                className="text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
+              >
+                {l.label}
+              </a>
+            )
+          )}
           <a
             href={LINKS.docs}
             className="text-sm text-[var(--muted)] hover:text-[var(--fg)] transition-colors"

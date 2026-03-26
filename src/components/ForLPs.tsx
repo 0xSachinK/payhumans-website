@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import SectionReveal from "./SectionReveal";
 
 const points = [
@@ -56,12 +57,12 @@ export default function ForLPs() {
             </div>
 
             <div className="text-center">
-              <a
+              <Link
                 href="/earn"
                 className="arrow-link inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] text-sm font-medium hover:bg-[var(--green)]/15 transition-all hover:translate-y-[-1px]"
               >
                 Start earning <span className="arrow">&rarr;</span>
-              </a>
+              </Link>
             </div>
           </div>
         </SectionReveal>

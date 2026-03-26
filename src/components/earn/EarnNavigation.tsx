@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Link from "next/link";
 import { LINKS } from "@/lib/constants";
 
 const links = [
@@ -30,14 +31,14 @@ export default function EarnNavigation() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-md bg-[var(--green)] flex items-center justify-center">
             <span className="text-[#050505] font-mono text-xs font-bold">P</span>
           </div>
           <span className="font-semibold text-sm tracking-tight">
             PayHumans<span className="text-[var(--green)]">.ai</span>
           </span>
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import SectionReveal from "../SectionReveal";
 
 export default function EarnCTA() {
@@ -32,12 +33,12 @@ export default function EarnCTA() {
                 >
                   Browse open jobs
                 </a>
-                <a
+                <Link
                   href="/"
                   className="cta-secondary px-6 py-3 rounded-lg border border-white/[0.08] hover:border-white/[0.16] text-sm font-medium bg-white/[0.02] hover:bg-white/[0.04]"
                 >
                   I&apos;m building an agent
-                </a>
+                </Link>
               </div>
             </div>
           </div>

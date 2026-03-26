@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import AnimatedCounter from "./AnimatedCounter";
 import { STATS } from "@/lib/constants";
 
@@ -54,18 +55,18 @@ export default function Hero() {
           transition={{ duration: 0.45, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
         >
-          <a
+          <Link
             href="/become-lp"
             className="cta-primary px-6 py-3 rounded-lg bg-[var(--accent)] hover:bg-[#2563eb] text-white text-sm font-medium glow-box"
           >
             I&apos;m building an agent
-          </a>
-          <a
+          </Link>
+          <Link
             href="/earn"
             className="cta-secondary px-6 py-3 rounded-lg border border-white/[0.08] hover:border-white/[0.16] text-sm font-medium bg-white/[0.02] hover:bg-white/[0.04]"
           >
             I want to earn
-          </a>
+          </Link>
         </motion.div>
 
         {/* Stats */}
