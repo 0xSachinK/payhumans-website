@@ -58,7 +58,7 @@ export default function ForLPs() {
 
             <div className="text-center">
               <a
-                href={LINKS.app}
+                href="/become-lp"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] text-sm font-medium hover:bg-[var(--green)]/15 transition-colors"
               >
                 Start providing liquidity &rarr;
