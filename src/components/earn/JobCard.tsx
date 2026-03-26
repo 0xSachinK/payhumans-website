@@ -70,6 +70,9 @@ export default function JobCard({
         <div className="text-xs text-[var(--muted)] mt-1">
           Send {job.fiatAmount} {job.currency} via {job.platform}
         </div>
+        <div className="text-[10px] text-[var(--muted)] mt-0.5 font-mono">
+          Range: ${job.intentAmountMin} - ${job.intentAmountMax}
+        </div>
       </div>
 
       {/* Earnings highlight */}

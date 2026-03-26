@@ -5,7 +5,7 @@ import CodeBlock from "./CodeBlock";
 
 const cliCode = `npm install -g @peer/cli
 peer config set env production
-peer config set walletPath /path/to/wallet.txt
+peer config set walletPath ~/wallet.txt
 # First trade in ~5 minutes`;
 
 const mcpCode = `{

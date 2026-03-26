@@ -2,7 +2,13 @@
 
 import SectionReveal from "./SectionReveal";
 
-const flows = [
+const flows: {
+  label: string;
+  tag: string;
+  color: string;
+  highlight?: boolean;
+  steps: { actor: string; action: string }[];
+}[] = [
   {
     label: "Agent buys USDC",
     tag: "ON-RAMP",
@@ -18,6 +24,7 @@ const flows = [
     label: "Agent provides liquidity",
     tag: "LP",
     color: "var(--green)",
+    highlight: true,
     steps: [
       { actor: "Agent", action: "Deposits USDC via CLI" },
       { actor: "Agent", action: "Sets rates and platforms" },
@@ -69,7 +76,13 @@ export default function HowItWorks() {
         <div className="grid md:grid-cols-2 gap-6">
           {flows.map((f, i) => (
             <SectionReveal key={f.label} delay={i * 0.07}>
-              <div className="frost p-7 h-full">
+              <div className={`frost p-7 h-full ${f.highlight ? "ring-1 ring-[var(--green)]/20" : ""}`}>
+                {f.highlight ? (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium bg-[var(--green)]/10 text-[var(--green)] border border-[var(--green)]/20 mb-4">
+                    <span className="w-1 h-1 rounded-full bg-[var(--green)]" />
+                    Most Common Flow
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-semibold text-lg">{f.label}</h3>
                   <span
