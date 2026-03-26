@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import EarnSteps from "./EarnSteps";
 import EarnCTA from "./EarnCTA";
+import EarnDashboard from "./EarnDashboard";
 import EarnRoadmap from "./EarnRoadmap";
 import ExtensionCheck from "./ExtensionCheck";
 import Footer from "@/components/Footer";
@@ -23,6 +24,7 @@ export default function EarnPageClient() {
       <main>
         <EarnHero />
         <ExtensionCheck />
+        <EarnDashboard />
         <EarnSteps />
         <JobBoard />
         <EarnCTA />
