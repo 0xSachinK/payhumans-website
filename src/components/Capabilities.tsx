@@ -20,7 +20,7 @@ export default function Capabilities() {
         </SectionReveal>
 
         <SectionReveal>
-          <div className="frost overflow-hidden">
+          <div className="frost overflow-hidden hover:!transform-none">
             <div className="grid gap-0 divide-y divide-white/[0.04]">
               {CAPABILITIES.map((c) => (
                 <div

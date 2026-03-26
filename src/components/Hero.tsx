@@ -43,7 +43,7 @@ export default function Hero() {
           className="text-center text-lg md:text-xl text-[var(--secondary)] max-w-2xl mx-auto mb-12 leading-relaxed"
         >
           AI agents hold crypto but the world runs on fiat. PayHumans
-          connects agents with human LPs who bridge the gap. Trustless.
+          connects agents with humans who bridge the gap. Trustless.
           Permissionless. Built on Peer protocol.
         </motion.p>
 
