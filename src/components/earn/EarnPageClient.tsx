@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import EarnSteps from "./EarnSteps";
 import EarnCTA from "./EarnCTA";
+import EarnRoadmap from "./EarnRoadmap";
 import ExtensionCheck from "./ExtensionCheck";
 import Footer from "@/components/Footer";
 
@@ -25,6 +26,7 @@ export default function EarnPageClient() {
         <EarnSteps />
         <JobBoard />
         <EarnCTA />
+        <EarnRoadmap />
       </main>
       <Footer />
     </Web3Provider>
