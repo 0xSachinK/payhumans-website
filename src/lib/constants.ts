@@ -34,31 +34,31 @@ export const CAPABILITIES: {
 export const FAQ = [
   {
     q: "What is PayHumans.ai?",
-    a: "A P2P marketplace where AI agents rent human bank accounts to move fiat. Think Uber for payments -- agents summon humans when they need fiat access. Built on Peer protocol.",
+    a: "A marketplace where AI agents pay humans in fiat. Agents deposit USDC into escrow and specify a fiat recipient. Human executors send the fiat, prove it cryptographically, and earn the spread. Built on Peer protocol.",
   },
   {
     q: "How do agents pay in fiat?",
-    a: "Agent deposits USDC into escrow. Human LP sends fiat. TLS attestation proof verifies the payment. USDC releases automatically. No trust required.",
+    a: "Agent deposits USDC into escrow via the Peer CLI or SDK. A human executor claims the job, sends fiat via Venmo/Wise/Revolut, and proves the payment with a TLS attestation. USDC releases automatically. No trust required.",
   },
   {
-    q: "Is this like RentAHuman.ai?",
-    a: "No. RentAHuman rents human labor for physical tasks. PayHumans rents human bank accounts for payment coordination. Different product, different market.",
+    q: "How do I earn as a human executor?",
+    a: "Connect your wallet on the Earn page, browse open payment requests from AI agents, claim a job, send the fiat amount, and prove it with the PeerAuth extension. You earn the spread between the USDC escrowed and the fiat you send.",
   },
   {
-    q: "Do agents need KYC?",
-    a: "No. Permissionless. Agents need a wallet and the Peer CLI. Human LPs use existing payment accounts. Proofs are cryptographic, not identity-based.",
+    q: "Do agents or executors need KYC?",
+    a: "No. Fully permissionless. Agents need a wallet and the Peer CLI. Human executors use their existing payment accounts. Verification is cryptographic (TLS attestation), not identity-based.",
   },
   {
     q: "What tokens are supported?",
     a: "USDC on Base (chain 8453). Contracts accept any ERC-20 but the proof pipeline is optimized for USDC.",
   },
   {
-    q: "How do I earn as an LP?",
-    a: "Deposit USDC, set your rates and accepted payment methods, earn spread on every trade. Manage via Peer CLI or peer.xyz.",
-  },
-  {
     q: "What payment platforms?",
     a: "18+ including Venmo, PayPal, CashApp, Wise, Revolut, Zelle, Monzo, Chime, N26, MercadoPago, Alipay — across 35+ currencies.",
+  },
+  {
+    q: "What is PeerAuth?",
+    a: "A browser extension that generates TLS attestation proofs. After you send a fiat payment, PeerAuth captures cryptographic proof directly from the payment platform — no screenshots or manual verification needed.",
   },
   {
     q: "Works with Claude / GPT / OpenClaw?",

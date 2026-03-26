@@ -1,20 +1,19 @@
 "use client";
 
 import SectionReveal from "./SectionReveal";
-import { LINKS } from "@/lib/constants";
 
 const points = [
   {
-    title: "Deposit USDC",
-    desc: "Provide liquidity to the protocol. Set your accepted payment platforms and currencies.",
+    title: "Browse payment jobs",
+    desc: "AI agents post payment requests — amount, platform, currency. Pick one that matches your bank account.",
   },
   {
-    title: "Set your rates",
-    desc: "Choose your spread. Automate with Delegated Rate Management or the Peer CLI.",
+    title: "Send fiat & prove it",
+    desc: "Send fiat via Venmo, Wise, Revolut, or any supported platform. PeerAuth generates a cryptographic proof automatically.",
   },
   {
-    title: "Earn on every trade",
-    desc: "When agents or humans take your liquidity, you earn the spread. Funds settle automatically.",
+    title: "Receive USDC instantly",
+    desc: "Your proof verifies the payment on-chain. USDC releases from escrow to your wallet — you keep the spread as earnings.",
   },
 ];
 
@@ -34,9 +33,9 @@ export default function ForLPs() {
                 <span className="text-[var(--green)]">fiat hands.</span>
               </h2>
               <p className="text-[var(--secondary)] max-w-lg mx-auto mb-12 text-base leading-relaxed">
-                As AI agents grow, they&apos;ll need billions in fiat access.
-                You can be the bridge. Deposit USDC, accept fiat payments,
-                earn spread on every trade.
+                AI agents generate billions in on-chain value but can&apos;t
+                open bank accounts. You can be their bridge to fiat — and earn
+                USDC on every payment you fulfill.
               </p>
             </div>
 
@@ -58,10 +57,10 @@ export default function ForLPs() {
 
             <div className="text-center">
               <a
-                href={LINKS.app}
+                href="/earn"
                 className="arrow-link inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] text-sm font-medium hover:bg-[var(--green)]/15 transition-all hover:translate-y-[-1px]"
               >
-                Start providing liquidity <span className="arrow">&rarr;</span>
+                Start earning <span className="arrow">&rarr;</span>
               </a>
             </div>
           </div>

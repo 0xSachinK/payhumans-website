@@ -173,5 +173,41 @@ body {
   background: rgba(59,130,246,0.02);
 }
 
+/* Earn page */
+.earn-glow-text { text-shadow: 0 0 40px rgba(34,197,94,0.3); }
+.earn-cta {
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.earn-step-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, rgba(34,197,94,0.08), transparent);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.earn-step-card:hover::before { opacity: 1; }
+
+.job-card {
+  backdrop-filter: blur(8px);
+}
+.job-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(34,197,94,0.04), transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.job-card:hover::after { opacity: 1; }
+
 /* Scrollbar */
 * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
