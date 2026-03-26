@@ -28,7 +28,7 @@ export default function Stats() {
             {platforms.map((p) => (
               <span
                 key={p}
-                className="px-4 py-2 rounded-full text-sm text-[var(--secondary)] border border-white/[0.06] bg-white/[0.02] hover:border-[var(--accent)]/20 hover:text-[var(--fg)] transition-colors cursor-default"
+                className="pill-hover px-4 py-2 rounded-full text-sm text-[var(--secondary)] border border-white/[0.06] bg-white/[0.02] hover:border-[var(--accent)]/20 hover:text-[var(--fg)] hover:bg-[var(--accent)]/[0.04] cursor-default"
               >
                 {p}
               </span>

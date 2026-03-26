@@ -26,7 +26,7 @@ export default function FAQ() {
               <Accordion.Item
                 key={i}
                 value={`item-${i}`}
-                className="frost overflow-hidden"
+                className="faq-item frost overflow-hidden"
               >
                 <Accordion.Trigger className="w-full flex items-center justify-between px-6 py-5 text-left text-sm font-medium hover:bg-white/[0.015] transition-colors group">
                   <span>{item.q}</span>

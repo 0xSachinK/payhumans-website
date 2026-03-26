@@ -77,9 +77,9 @@ export default function PeerCLI() {
           <div className="text-center mt-12">
             <a
               href={LINKS.cliDocs}
-              className="inline-flex items-center gap-2 text-sm text-[var(--accent)] hover:text-[#60a5fa] transition-colors font-medium"
+              className="arrow-link inline-flex items-center gap-2 text-sm text-[var(--accent)] hover:text-[#60a5fa] transition-colors font-medium"
             >
-              Read the full CLI docs &rarr;
+              Read the full CLI docs <span className="arrow">&rarr;</span>
             </a>
           </div>
         </SectionReveal>

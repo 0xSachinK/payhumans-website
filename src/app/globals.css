@@ -64,11 +64,13 @@ body {
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--border);
   border-radius: 12px;
-  transition: border-color 0.3s, background 0.3s;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 .frost:hover {
   border-color: rgba(59,130,246,0.2);
   background: rgba(59,130,246,0.03);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
 /* Syntax colors */
@@ -117,6 +119,59 @@ body {
 /* Accordion chevron rotation */
 [data-state="open"] .chevron { transform: rotate(180deg); }
 .chevron { transition: transform 200ms ease; }
+
+/* CTA hover */
+.cta-primary {
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.cta-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(59,130,246,0.2), 0 0 64px rgba(59,130,246,0.08);
+}
+.cta-primary:active {
+  transform: translateY(0);
+}
+.cta-secondary {
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.cta-secondary:hover {
+  transform: translateY(-1px);
+}
+.cta-secondary:active {
+  transform: translateY(0);
+}
+
+/* Arrow animation on hover */
+.arrow-link .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.arrow-link:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* Platform pill hover */
+.pill-hover {
+  transition: border-color 0.2s, color 0.2s, transform 0.2s, background 0.2s;
+}
+.pill-hover:hover {
+  transform: translateY(-1px);
+}
+
+/* Capabilities row hover accent */
+.cap-row {
+  border-left: 2px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+.cap-row:hover {
+  border-left-color: var(--accent);
+}
+
+/* FAQ item open state */
+[data-state="open"].faq-item {
+  border-color: rgba(59,130,246,0.15);
+  background: rgba(59,130,246,0.02);
+}
 
 /* Scrollbar */
 * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }

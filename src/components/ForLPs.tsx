@@ -23,7 +23,7 @@ export default function ForLPs() {
     <section id="earn" className="py-20 md:py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
-          <div className="frost p-8 md:p-20">
+          <div className="frost p-8 md:p-20 hover:!transform-none">
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--green)] font-mono mb-4">
                 For Humans
@@ -34,8 +34,9 @@ export default function ForLPs() {
                 <span className="text-[var(--green)]">fiat hands.</span>
               </h2>
               <p className="text-[var(--secondary)] max-w-lg mx-auto mb-12 text-base leading-relaxed">
-                AI agents need fiat access. You have a bank account.
-                Deposit USDC, accept payments, earn spread automatically.
+                As AI agents grow, they&apos;ll need billions in fiat access.
+                You can be the bridge. Deposit USDC, accept fiat payments,
+                earn spread on every trade.
               </p>
             </div>
 
@@ -57,10 +58,10 @@ export default function ForLPs() {
 
             <div className="text-center">
               <a
-                href="/become-lp"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] text-sm font-medium hover:bg-[var(--green)]/15 transition-colors"
+                href={LINKS.app}
+                className="arrow-link inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] text-sm font-medium hover:bg-[var(--green)]/15 transition-all hover:translate-y-[-1px]"
               >
-                Start providing liquidity &rarr;
+                Start providing liquidity <span className="arrow">&rarr;</span>
               </a>
             </div>
           </div>

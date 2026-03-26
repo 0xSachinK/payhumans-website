@@ -57,10 +57,10 @@ export default function Navigation() {
             Docs
           </a>
           <a
-            href="/become-lp"
-            className="text-sm font-medium text-[#050505] bg-[var(--fg)] hover:bg-white px-4 py-1.5 rounded-md transition-colors"
+            href={LINKS.github}
+            className="text-sm font-medium text-[#050505] bg-[var(--fg)] hover:bg-white px-4 py-1.5 rounded-md transition-all hover:shadow-[0_0_16px_rgba(228,228,231,0.15)]"
           >
-            Become an LP
+            Get started
           </a>
         </div>
 
@@ -88,8 +88,8 @@ export default function Navigation() {
                   {l.label}
                 </a>
               ))}
-              <a href="/become-lp" className="text-sm font-medium text-center text-[#050505] bg-[var(--fg)] px-4 py-2 rounded-md mt-2">
-                Become an LP
+              <a href={LINKS.github} className="text-sm font-medium text-center text-[#050505] bg-[var(--fg)] px-4 py-2 rounded-md mt-2">
+                Get started
               </a>
             </div>
           </motion.div>

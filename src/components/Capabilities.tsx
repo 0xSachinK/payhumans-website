@@ -25,7 +25,7 @@ export default function Capabilities() {
               {CAPABILITIES.map((c) => (
                 <div
                   key={c.name}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors group"
+                  className="cap-row flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <span
