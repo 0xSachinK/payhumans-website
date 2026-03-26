@@ -19,7 +19,7 @@ const points = [
 
 export default function ForLPs() {
   return (
-    <section id="earn" className="py-20 md:py-32 px-6">
+    <section id="earn" className="py-16 md:py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
           <div className="frost p-8 md:p-20 hover:!transform-none">
