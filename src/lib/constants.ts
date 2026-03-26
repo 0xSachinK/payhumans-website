@@ -68,4 +68,16 @@ export const FAQ = [
     q: "What about x402?",
     a: "Our APIs are x402-enabled. Agents pay per request with USDC micropayments. PayHumans complements x402 — x402 for agent-to-agent crypto, PayHumans for the fiat bridge.",
   },
+  {
+    q: "Is this like RentAHuman.ai?",
+    a: "No. RentAHuman rents human labor for arbitrary tasks. PayHumans rents human bank accounts for verified fiat payments. Our payments are cryptographically verified via ZK proofs — not trust-based. And we support real fiat settlement, not just crypto payouts.",
+  },
+  {
+    q: "How is this different from Payman AI?",
+    a: "Payman is payment infrastructure for developers — APIs and SDKs to move money. PayHumans is a marketplace where agents find humans to move fiat. Think of Payman as the plumbing and PayHumans as the marketplace built on top. Plus, we're permissionless — no KYC, no invite codes, no monthly fee.",
+  },
+  {
+    q: "What if the human doesn't pay?",
+    a: "The intent has a time limit. If the human doesn't prove payment within the window, the intent expires and funds stay in escrow. No risk to the depositor. The ZK proof is binary — either it verifies or it doesn't.",
+  },
 ];
