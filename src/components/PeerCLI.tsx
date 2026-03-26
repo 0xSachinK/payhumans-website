@@ -63,7 +63,7 @@ export default function PeerCLI() {
                       <h4 className="text-sm font-semibold mb-1">{f.title}</h4>
                       <p className="text-xs text-[var(--muted)] leading-relaxed">{f.desc}</p>
                     </div>
-                    <code className="text-[10px] font-mono text-[var(--accent)] bg-[var(--accent)]/[0.08] px-2 py-1 rounded whitespace-nowrap shrink-0">
+                    <code className="text-[11px] font-mono text-[var(--accent)] bg-[var(--accent)]/[0.08] border border-[var(--accent)]/[0.1] px-2.5 py-1 rounded whitespace-nowrap shrink-0">
                       {f.mono}
                     </code>
                   </div>

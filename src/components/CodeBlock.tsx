@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
 
 function hl(code: string, lang: string): string {
   if (lang === "json") return hlJSON(code);
@@ -14,9 +14,9 @@ function hlBash(code: string): string {
     if (l.trim().startsWith("#"))
       return `<span class="s-comment">${l}</span>`;
     return l
-      .replace(/(--[\w-]+)/g, '<span class="s-flag">$1</span>')
-      .replace(/\b(peer|npm|npx)\b/g, '<span class="s-kw">$1</span>')
       .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="s-str">$1</span>')
+      .replace(/(--[\w-]+)/g, '<span class="s-flag">$1</span>')
+      .replace(/\b(peer|npm|npx)\b(\s+)([\w-]+)/g, '<span class="s-kw">$1</span>$2<span class="s-cmd">$3</span>')
       .replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="s-val">$1</span>');
   }).join("\n");
 }
@@ -48,6 +48,14 @@ export default function CodeBlock({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-30px" });
+  const [copied, setCopied] = useState(false);
+
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(children).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [children]);
 
   return (
     <motion.div
@@ -55,7 +63,7 @@ export default function CodeBlock({
       initial={{ opacity: 0, y: 16 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.4 }}
-      className="terminal"
+      className="terminal group/term"
     >
       <div className="terminal-bar">
         <div className="terminal-dot bg-[#ff5f57]" />
@@ -66,8 +74,15 @@ export default function CodeBlock({
             {title}
           </span>
         ) : null}
+        <button
+          onClick={copy}
+          className="ml-auto text-[11px] font-mono text-[var(--muted)] hover:text-[var(--fg)] opacity-0 group-hover/term:opacity-100 transition-all px-2 py-0.5 rounded hover:bg-white/[0.06]"
+          aria-label="Copy code"
+        >
+          {copied ? "copied" : "copy"}
+        </button>
       </div>
-      <pre className="p-5 overflow-x-auto text-[13px] leading-relaxed font-mono">
+      <pre className="p-5 overflow-x-auto text-[13px] leading-[1.7] font-mono">
         <code dangerouslySetInnerHTML={{ __html: hl(children, lang) }} />
       </pre>
     </motion.div>

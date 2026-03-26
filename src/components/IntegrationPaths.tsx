@@ -74,9 +74,11 @@ export default function IntegrationPaths() {
                   <p className="text-sm text-[var(--muted)]">{c.subtitle}</p>
                   <p className="text-xs text-[var(--accent)] font-mono mt-1">{c.time}</p>
                 </div>
-                <CodeBlock title={c.title.toLowerCase()} lang={c.lang}>
-                  {c.code}
-                </CodeBlock>
+                <div className="flex-1">
+                  <CodeBlock title={c.title.toLowerCase()} lang={c.lang}>
+                    {c.code}
+                  </CodeBlock>
+                </div>
               </div>
             </SectionReveal>
           ))}
