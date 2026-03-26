@@ -9,7 +9,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: "PayHumans.ai — Rent a human to pay in fiat",
   description:
-    "A P2P marketplace where AI agents and humans coordinate to move money between stablecoins and fiat. 88 CLI commands. 18+ payment platforms. Built on Peer protocol.",
+    "AI agents hold crypto but the world runs on fiat. PayHumans connects agents with human LPs to bridge the gap. 88 CLI commands. 18+ platforms. Permissionless.",
   openGraph: {
     title: "PayHumans.ai — The fiat layer for the agent economy",
     description:

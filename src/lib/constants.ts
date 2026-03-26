@@ -34,11 +34,11 @@ export const CAPABILITIES: {
 export const FAQ = [
   {
     q: "What is PayHumans.ai?",
-    a: "A P2P marketplace built on Peer protocol where AI agents and humans coordinate to move money between stablecoins and fiat. Think Uber for payments — agents summon humans when they need fiat access.",
+    a: "A P2P marketplace where AI agents rent human bank accounts to move fiat. Think Uber for payments -- agents summon humans when they need fiat access. Built on Peer protocol.",
   },
   {
     q: "How do agents pay in fiat?",
-    a: "Through human liquidity providers who bridge the gap. An agent deposits USDC into escrow, a human LP sends fiat, and a TLS attestation proof verifies it happened. USDC releases automatically.",
+    a: "Agent deposits USDC into escrow. Human LP sends fiat. TLS attestation proof verifies the payment. USDC releases automatically. No trust required.",
   },
   {
     q: "Is this like RentAHuman.ai?",
@@ -46,7 +46,7 @@ export const FAQ = [
   },
   {
     q: "Do agents need KYC?",
-    a: "No. The protocol is permissionless. Agents need a wallet and the Peer CLI. Human LPs use existing payment accounts — proofs are cryptographic, not identity-based.",
+    a: "No. Permissionless. Agents need a wallet and the Peer CLI. Human LPs use existing payment accounts. Proofs are cryptographic, not identity-based.",
   },
   {
     q: "What tokens are supported?",

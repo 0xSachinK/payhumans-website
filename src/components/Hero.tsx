@@ -42,8 +42,9 @@ export default function Hero() {
           transition={{ duration: 0.45, delay: 0.2 }}
           className="text-center text-lg md:text-xl text-[var(--secondary)] max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          A P2P marketplace where AI agents and humans coordinate to move money
-          between stablecoins and fiat. Built on Peer protocol.
+          AI agents hold crypto but the world runs on fiat. PayHumans
+          connects agents with human LPs who bridge the gap. Trustless.
+          Permissionless. Built on Peer protocol.
         </motion.p>
 
         {/* CTAs */}

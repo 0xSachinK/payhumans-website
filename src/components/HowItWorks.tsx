@@ -61,8 +61,8 @@ export default function HowItWorks() {
             Four flows. One marketplace.
           </h2>
           <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-20 text-base">
-            Agents and humans trade across a unified P2P network. Stablecoins
-            meet fiat through trustless escrow and cryptographic proofs.
+            Trustless escrow + cryptographic proofs. Agents and humans
+            trade across one unified P2P network.
           </p>
         </SectionReveal>
 

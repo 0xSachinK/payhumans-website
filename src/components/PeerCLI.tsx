@@ -5,12 +5,12 @@ import CodeBlock from "./CodeBlock";
 import { LINKS } from "@/lib/constants";
 
 const features = [
-  { title: "JSON-first output", desc: "Structured ok/error envelope on every command. Built for machines.", mono: "{ ok, data, meta }" },
-  { title: "MCP server", desc: "peer mcp --full exposes 88 tools via Model Context Protocol.", mono: "peer mcp --full" },
-  { title: "X402 ready", desc: "Indexer and Peerlytics APIs accept USDC micropayments per request.", mono: "x-payment: x402" },
-  { title: "Prepared txns", desc: "Write commands preview before executing. Add --yes to broadcast.", mono: "--yes" },
-  { title: "Auto error codes", desc: "Every error has code, category, retryable flag, and suggestion.", mono: "retryable: true" },
-  { title: "Env switching", desc: "production, preproduction, staging with a single flag.", mono: "--env staging" },
+  { title: "JSON-first output", desc: "Structured ok/error envelope on every command. Pipe it, parse it, ship it.", mono: "{ ok, data, meta }" },
+  { title: "MCP server", desc: "88 payment tools exposed via Model Context Protocol. One command to start.", mono: "peer mcp --full" },
+  { title: "X402 ready", desc: "Pay-per-request APIs. Agents pay in USDC micropayments.", mono: "x-payment: x402" },
+  { title: "Prepared txns", desc: "Preview before broadcast. Add --yes to auto-confirm.", mono: "--yes" },
+  { title: "Auto error codes", desc: "Code, category, retryable flag, suggestion. Every error.", mono: "retryable: true" },
+  { title: "Env switching", desc: "Production, preproduction, staging. One flag.", mono: "--env staging" },
 ];
 
 const code = `# Get a fiat-to-USDC quote
@@ -44,8 +44,8 @@ export default function PeerCLI() {
             <span className="text-[var(--muted)]">Full protocol access.</span>
           </h2>
           <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-16 text-base">
-            The Peer CLI is a JSON-first command-line tool and MCP server.
-            Everything your agent needs.
+            JSON-first. MCP-native. Every command your agent needs
+            to quote, trade, deposit, and settle.
           </p>
         </SectionReveal>
 

@@ -6,17 +6,17 @@ const items = [
   {
     icon: "0x",
     title: "Agents live on-chain",
-    desc: "They hold USDC, transact via wallets, settle in seconds. But the world\u2019s $150T economy runs on fiat.",
+    desc: "Wallets, USDC, instant settlement. But $150T of the global economy still runs on fiat rails.",
   },
   {
     icon: "ID",
     title: "Banks require identity",
-    desc: "KYC, identity docs, physical addresses. Software can\u2019t satisfy these. No bank account, no fiat.",
+    desc: "KYC, identity docs, physical addresses. Software can\u2019t satisfy any of these. No bank account = no fiat.",
   },
   {
     icon: "//",
     title: "Solutions are centralized",
-    desc: "MoonPay Agents, Visa, Google AP2 \u2014 all require human KYC at setup. No permissionless path exists.",
+    desc: "MoonPay, Visa, Google AP2 \u2014 all gate on human KYC. There\u2019s no permissionless path. Until now.",
   },
 ];
 
@@ -34,8 +34,8 @@ export default function Problem() {
             <span className="text-[var(--muted)]">bank accounts.</span>
           </h2>
           <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-20 text-base">
-            Every agent payment protocol solves crypto-to-crypto. The fiat
-            bridge is the missing piece.
+            Every payment protocol solves crypto-to-crypto.
+            Nobody solves the fiat bridge.
           </p>
         </SectionReveal>
 

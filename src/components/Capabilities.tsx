@@ -15,7 +15,7 @@ export default function Capabilities() {
             What agents can do today.
           </h2>
           <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-16 text-base">
-            Nine capabilities live in production. One more coming soon.
+            Production-ready. Battle-tested on $20M+ volume.
           </p>
         </SectionReveal>
 

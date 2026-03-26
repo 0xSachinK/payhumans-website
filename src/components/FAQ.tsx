@@ -16,7 +16,7 @@ export default function FAQ() {
             Frequently asked.
           </h2>
           <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-16 text-base">
-            Everything you need to know about PayHumans and the Peer protocol.
+            How it works, what it costs, and why agents need humans.
           </p>
         </SectionReveal>
 

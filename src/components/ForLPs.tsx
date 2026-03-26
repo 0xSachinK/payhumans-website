@@ -34,9 +34,8 @@ export default function ForLPs() {
                 <span className="text-[var(--green)]">fiat hands.</span>
               </h2>
               <p className="text-[var(--secondary)] max-w-lg mx-auto mb-12 text-base leading-relaxed">
-                As AI agents grow, they&apos;ll need billions in fiat access.
-                You can be the bridge. Deposit USDC, accept fiat payments,
-                earn spread on every trade.
+                AI agents need fiat access. You have a bank account.
+                Deposit USDC, accept payments, earn spread automatically.
               </p>
             </div>
 
