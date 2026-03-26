@@ -23,7 +23,7 @@ export default function ForLPs() {
     <section id="earn" className="py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
-          <div className="frost p-10 md:p-16">
+          <div className="frost p-10 md:p-20">
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--green)] font-mono mb-4">
                 For Humans

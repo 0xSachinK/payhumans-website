@@ -4,17 +4,17 @@ import SectionReveal from "./SectionReveal";
 
 const items = [
   {
-    icon: "\u2B21", // hexagon
+    icon: "0x",
     title: "Agents live on-chain",
     desc: "They hold USDC, transact via wallets, settle in seconds. But the world\u2019s $150T economy runs on fiat.",
   },
   {
-    icon: "\u2298", // circle with slash
+    icon: "ID",
     title: "Banks require identity",
     desc: "KYC, identity docs, physical addresses. Software can\u2019t satisfy these. No bank account, no fiat.",
   },
   {
-    icon: "\u2297", // circle with x
+    icon: "//",
     title: "Solutions are centralized",
     desc: "MoonPay Agents, Visa, Google AP2 \u2014 all require human KYC at setup. No permissionless path exists.",
   },
@@ -25,6 +25,9 @@ export default function Problem() {
     <section className="py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionReveal>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
+            The Problem
+          </p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
             AI agents can&apos;t open
             <br />
@@ -40,7 +43,7 @@ export default function Problem() {
           {items.map((it, i) => (
             <SectionReveal key={it.title} delay={i * 0.1}>
               <div className="frost p-8 h-full">
-                <div className="text-2xl text-[var(--accent)] mb-5 font-mono">
+                <div className="w-10 h-10 rounded-lg bg-[var(--accent)]/[0.08] border border-[var(--accent)]/[0.15] flex items-center justify-center text-sm text-[var(--accent)] font-mono font-bold mb-5">
                   {it.icon}
                 </div>
                 <h3 className="text-lg font-semibold mb-3">{it.title}</h3>

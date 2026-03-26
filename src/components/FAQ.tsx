@@ -9,9 +9,15 @@ export default function FAQ() {
     <section id="faq" className="py-32 px-6">
       <div className="max-w-3xl mx-auto">
         <SectionReveal>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-16">
-            FAQ
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
+            Questions
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
+            Frequently asked.
           </h2>
+          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-16 text-base">
+            Everything you need to know about PayHumans and the Peer protocol.
+          </p>
         </SectionReveal>
 
         <SectionReveal>

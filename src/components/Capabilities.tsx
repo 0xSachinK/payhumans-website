@@ -25,7 +25,7 @@ export default function Capabilities() {
               {CAPABILITIES.map((c) => (
                 <div
                   key={c.name}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.015] transition-colors"
+                  className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <span
@@ -33,11 +33,11 @@ export default function Capabilities() {
                     >
                       {c.status === "live" ? "Live" : "Soon"}
                     </span>
-                    <span className="text-sm font-medium truncate">
+                    <span className="text-sm font-medium truncate group-hover:text-white transition-colors">
                       {c.name}
                     </span>
                   </div>
-                  <code className="text-xs font-mono text-[var(--muted)] hidden sm:block truncate ml-4">
+                  <code className="text-[11px] font-mono text-[var(--muted)] hidden sm:block truncate ml-4 bg-white/[0.03] px-2.5 py-1 rounded">
                     {c.command}
                   </code>
                 </div>

@@ -89,7 +89,7 @@ export default function HowItWorks() {
                       {j < f.steps.length - 1 ? (
                         <div
                           className="absolute left-[11px] top-6 w-px h-[calc(100%-8px)]"
-                          style={{ background: `color-mix(in srgb, ${f.color} 15%, transparent)` }}
+                          style={{ background: `color-mix(in srgb, ${f.color} 25%, transparent)` }}
                         />
                       ) : null}
                       <div

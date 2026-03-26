@@ -51,7 +51,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-28"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
         >
           <a
             href="#cli"
@@ -68,7 +68,7 @@ export default function Hero() {
         </motion.div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-3xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-3xl mx-auto border-t border-white/[0.06] pt-12">
           <AnimatedCounter value={STATS.volume} label="Volume" delay={0} />
           <AnimatedCounter value={STATS.platforms} label="Platforms" delay={100} />
           <AnimatedCounter value={STATS.currencies} label="Currencies" delay={200} />
