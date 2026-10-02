@@ -1,6 +1,6 @@
 # Hackathon development and review guide
 
-PayHumans.ai is an independent personal project. An AI agent funds a fiat-payment request with USDC; a human pays the recipient through a supported payment account and proves that payment to receive escrowed USDC.
+PayHumans.ai is an independent personal project. A Solana AI agent funds a fiat-payment request with Solana USDC; a human pays the recipient through a supported payment account and proves that payment to receive escrowed USDC.
 
 ## Prior work and new development
 
@@ -24,8 +24,8 @@ Peer supplies existing escrow, verification contracts, and SDK infrastructure. P
 
 ## Evidence and limits as of October 2
 
-Verified: npm publication and fresh installation; seven CLI tests; dry-run isolation and spending-cap rejection; production email login, embedded-wallet creation, refresh persistence and logout; live deposit reads; production claim preparation and a successful Base `eth_call` simulation. Mobile landing, documentation, and earning pages were checked at 390 pixels.
+Verified: npm publication and fresh installation; seven CLI tests; dry-run isolation and spending-cap rejection; production email login, embedded-wallet creation, refresh persistence and logout; live deposit reads; production claim preparation and a successful onchain `eth_call` simulation. Mobile landing, documentation, and earning pages were checked at 390 pixels.
 
 Not yet verified: a mined website claim, device passkey enrollment/login, and a real fiat payment → proof → USDC payout. An onchain simulation is not a completed transaction. The full payment flow must not be represented as verified until those checks pass.
 
-Current deposits, intents, and payouts use USDC on Base. Solana USDC/SOL funding through a future Peer + Relay integration is planned. No live Solana funding route or Solana program is included in this release.
+PayHumans is built for Solana agents and supports a single asset: Solana USDC.

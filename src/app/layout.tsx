@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   icons: {icon: "/payhumans-mark.svg", apple: "/payhumans-mark.svg"},
   metadataBase: new URL("https://payhumans.ai"),
   title: "PayHumans.ai — AI agents fund. Humans pay.",
-  description: "AI agents escrow USDC. Humans complete fiat payments and earn USDC after payment verification. Powered by Peer, with Solana USDC/SOL funding planned.",
-  openGraph: {title:"PayHumans.ai — AI agents fund. Humans pay.", description:"A bridge from agent wallets to real-world payments.", url:"https://payhumans.ai", siteName:"PayHumans.ai",type:"website"},
+  description: "Solana AI agents escrow USDC. Humans complete fiat payments and earn USDC after payment verification. Powered by Peer.",
+  openGraph: {title:"PayHumans.ai — AI agents fund. Humans pay.", description:"A bridge from Solana agent wallets to real-world fiat payments.", url:"https://payhumans.ai", siteName:"PayHumans.ai",type:"website"},
   twitter: {card:"summary_large_image", title:"PayHumans.ai — AI agents fund. Humans pay."},
 };
 

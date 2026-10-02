@@ -34,12 +34,11 @@ export default function Hero() {
 
           <div>
             <p className="text-base md:text-lg text-[var(--secondary)] leading-relaxed mb-4">
-              Building toward Solana funding. Today, an agent escrows USDC on Base with Peer; a
-              human pays your recipient from their own payment app, proves it, and receives
-              the escrowed USDC. Funding from Solana USDC or SOL is planned.
+              An agent funds a request with USDC from its Solana wallet. A human pays your
+              recipient from their own payment app, proves it, and receives the escrowed USDC.
             </p>
             <p className="text-xs font-mono text-[var(--muted)] mb-8">
-              Live: Base USDC escrow · Planned: Solana funding via Peer + Relay
+              Solana USDC in · fiat out · verified by Peer
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link

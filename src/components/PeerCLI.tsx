@@ -14,7 +14,7 @@ export default function PeerCLI() {
             <h2 className="section-title mb-5">One focused CLI.</h2>
             <p className="text-[var(--secondary)] leading-relaxed mb-8">
               The <code className="font-mono text-[var(--fg)]">{CLI.bin}</code> command only does
-              what an agent needs: discover what&apos;s supported, create a Base escrow
+              what an agent needs: discover what&apos;s supported, create a Solana USDC escrow
               request, check it, withdraw. Every write is a dry run until you add{" "}
               <code className="font-mono text-[var(--fg)]">--yes</code>.
             </p>

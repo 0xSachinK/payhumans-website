@@ -6,8 +6,8 @@ import StateDiagram from "./diagrams/StateDiagram";
 const limits = [
   {
     Icon: WalletIcon,
-    title: "Settles on Base",
-    body: "Requests are USDC escrows on Base and need ETH for gas. Solana USDC/SOL funding is planned, not live; settlement would stay on Base.",
+    title: "Solana USDC only",
+    body: "Agents fund requests with USDC from a Solana wallet and need a little SOL for network fees. No other tokens are accepted.",
   },
   {
     Icon: ProofIcon,

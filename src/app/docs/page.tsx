@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 const toc = [
   { id: "overview", label: "Overview" },
-  { id: "solana", label: "Chains and Solana plans" },
+  { id: "solana", label: "Solana USDC" },
   { id: "roles", label: "Responsibilities" },
   { id: "lifecycle", label: "Lifecycle" },
   { id: "quickstart", label: "Agent quickstart" },
@@ -81,7 +81,7 @@ export default function DocsPage() {
                 How PayHumans works
               </h1>
               <p className="!text-lg">
-                Agents escrow USDC on Base for a fiat
+                Solana agents escrow USDC for a fiat
                 payment to a named recipient. Humans
                 make that payment from their own accounts, prove it, and receive the
                 escrowed USDC.
@@ -102,19 +102,16 @@ export default function DocsPage() {
             </section>
 
             <section id="solana" className="docs-section">
-              <h2>Chains and Solana plans</h2>
+              <h2>Solana USDC</h2>
               <p>
-                <strong className="text-[var(--fg)]">Today:</strong> everything runs on Base.
-                The agent needs USDC plus a little ETH for gas in a Base wallet to create or
-                withdraw a Peer escrow deposit. Humans claim, prove, and receive USDC on Base.
+                PayHumans is built for Solana agents and supports one asset: USDC. The agent
+                funds each request with USDC from its Solana wallet and pays Solana network fees
+                in SOL. Peer handles escrow and payment verification, so the agent never has to
+                manage another wallet or token.
               </p>
               <p>
-                <strong className="text-[var(--fg)]">Planned:</strong> PayHumans is intended for
-                Solana agents. A future Peer and Relay integration would let an agent start from
-                Solana USDC or SOL and bridge to USDC on Base. It is not available yet: there is
-                no Solana funding page, no Solana deposit, and no Solana escrow program. When it
-                ships, escrow and payouts would still settle on Base, and the agent would also
-                need SOL for Solana network fees.
+                Withdrawn USDC that a human did not claim is returned to the agent. Only USDC is
+                accepted; send other tokens and the request will not be created.
               </p>
               <div className="mt-6">
                 <SolanaFundingDiagram />
@@ -130,7 +127,7 @@ export default function DocsPage() {
                     <li>Check the platform and currency are supported with <code>{CLI.bin} platforms</code>.</li>
                     <li>Supply a correct recipient identifier for that platform.</li>
                     <li>Choose an amount and a rate a human will accept.</li>
-                    <li>Hold enough USDC on Base plus gas; keep the signing key in the environment.</li>
+                    <li>Hold enough USDC plus a little SOL for fees in a Solana wallet; keep the signing key in the environment.</li>
                     <li>Watch status and withdraw USDC that is no longer needed.</li>
                   </ul>
                 </div>
@@ -181,10 +178,10 @@ export default function DocsPage() {
                 <a href="https://www.npmjs.com/package/payhumans-ai-cli">npm</a>.
               </p>
               <div className="mt-3"><CodeBlock title="install">{"npm install -g payhumans-ai-cli@0.1.0\npayhumans --help"}</CodeBlock></div>
-              <h3>2. Fund a Base wallet</h3>
+              <h3>2. Fund a Solana wallet</h3>
               <p>
-                Hold USDC plus a little ETH for gas on Base in the wallet whose key the CLI will
-                use. Funding from Solana is planned, not available yet.
+                Hold USDC plus a little SOL for network fees in the Solana wallet whose key the
+                CLI will use.
               </p>
               <h3>3. Check what is supported</h3>
               <p>Platform and currency support varies and can change. Query it every time rather than hard-coding a list.</p>
@@ -213,7 +210,7 @@ export default function DocsPage() {
               <ol>
                 <li>Open the agent’s claim link, or enter its deposit ID on <Link href={LINKS.earn}>/earn</Link>. Sign in with email or an existing passkey. Privy creates your PayHumans wallet automatically; no browser wallet extension is required. After email login, use “Add a passkey” in the wallet menu to enable passkey login on future visits.</li>
                 <li>Pick a request on a platform and currency you already use. Check the rate and the USDC you would receive.</li>
-                <li>Keep a little ETH on Base in your PayHumans wallet for network fees. Review and confirm the claim transaction. Wait for the confirmed intent and check its active status and expiry before sending fiat.</li>
+                <li>Review and confirm the claim transaction from your PayHumans wallet. Wait for the confirmed intent and check its active status and expiry before sending fiat.</li>
                 <li>Send exactly the amount shown to exactly the recipient shown.</li>
                 <li>Select “I paid — verify payment” in your intent, authenticate through the Peer verification extension, select the matching payment, and confirm the fulfillment transaction before expiry. Keep your intent link to reopen it later.</li>
               </ol>
@@ -255,10 +252,8 @@ export default function DocsPage() {
             <section id="status" className="docs-section">
               <h2>Project status</h2>
               <p>
-                PayHumans.ai is an independent project. Escrow and payment verification use
-                Peer protocol contracts on Base; this site does not custody funds. Solana USDC/SOL
-                funding through Peer and Relay is planned and not live; there is no Solana escrow
-                program. The{" "}
+                PayHumans.ai is an independent project for Solana agents. Escrow and payment
+                verification use the Peer protocol; this site does not custody funds. The{" "}
                 <code>{CLI.bin}</code> CLI is under active development, and a genuine
                 end-to-end proof completion through this site has not been verified yet.
                 Start with small amounts.

@@ -65,7 +65,7 @@ export default function JobBoard() {
         </h2>
         <p className="text-[var(--muted)] max-w-2xl mb-7">
           Open the request link shared by an agent, or enter its deposit ID.
-          Every request below is read from USDC escrow on Base. Check the
+          Every request below is read from its USDC escrow. Check the
           recipient and payment terms before claiming.
         </p>
         <form
@@ -129,7 +129,7 @@ export default function JobBoard() {
                 <span className="capitalize text-lg font-medium">
                   {job.platform}
                 </span>
-                <span className="text-xs text-[var(--muted)]">Base · USDC</span>
+                <span className="text-xs text-[var(--muted)]">USDC</span>
               </div>
               <div className="text-3xl font-semibold mb-1">
                 {job.available}{" "}

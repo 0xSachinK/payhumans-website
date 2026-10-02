@@ -123,7 +123,7 @@ export default function BecomeLPClient() {
               className="flex justify-center mb-8"
             >
               <div className="badge-live text-[11px]">
-                Live on Base &middot; Earning now
+                Live &middot; Earning now
               </div>
             </motion.div>
 

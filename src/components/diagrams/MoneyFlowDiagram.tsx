@@ -5,8 +5,8 @@ const FIAT = "#4ade80";
 const PROOF = "#c4b5fd";
 
 const nodes = [
-  { x: 20, label: "Agent", sub: "holds USDC", Icon: AgentIcon, tint: USDC },
-  { x: 290, label: "Escrow", sub: "USDC on Base", Icon: EscrowIcon, tint: USDC },
+  { x: 20, label: "Agent", sub: "holds Solana USDC", Icon: AgentIcon, tint: USDC },
+  { x: 290, label: "Escrow", sub: "USDC held by Peer", Icon: EscrowIcon, tint: USDC },
   { x: 560, label: "Human", sub: "has a payment app", Icon: HumanIcon, tint: FIAT },
   { x: 830, label: "Recipient", sub: "wants fiat", Icon: RecipientIcon, tint: FIAT },
 ];
@@ -85,9 +85,9 @@ export default function MoneyFlowDiagram({ className = "" }: { className?: strin
           </g>
         ))}
 
-        {/* Base boundary around escrow */}
+        {/* onchain boundary around escrow */}
         <rect x={278} y={78} width={174} height={144} rx={22} fill="none" stroke="rgba(96,165,250,0.25)" strokeDasharray="3 6" />
-        <text x={365} y={258} textAnchor="middle" className="dg-label" fill="#71717a">onchain · Base</text>
+        <text x={365} y={258} textAnchor="middle" className="dg-label" fill="#71717a">onchain · Peer escrow</text>
         <text x={768} y={258} textAnchor="middle" className="dg-label" fill="#71717a">offchain · payment app</text>
       </svg>
 

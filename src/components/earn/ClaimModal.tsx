@@ -126,7 +126,7 @@ export default function ClaimModal({
       const pendingUrl = new URL(window.location.href);
       pendingUrl.searchParams.set("claimTx", hash);
       window.history.replaceState({}, "", pendingUrl);
-      setMessage("Waiting for confirmation on Base…");
+      setMessage("Waiting for onchain confirmation…");
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       const intentHash = confirmedIntent(receipt);
       setIntent(intentHash);
@@ -216,7 +216,7 @@ export default function ClaimModal({
             rel="noreferrer"
             className="block text-sm underline mb-4"
           >
-            View claim transaction on Base ↗
+            View claim transaction ↗
           </a>
         )}
         {phase === "claimed" ? (
@@ -262,7 +262,7 @@ export default function ClaimModal({
                   : !authenticated
                     ? "Sign in to claim"
                     : chainId !== 8453
-                      ? "Switch to Base"
+                      ? "Switch network"
                       : "Sign & claim job"}
             </button>
           </>

@@ -9,7 +9,7 @@ const roles = [
     spends: "USDC",
     gets: "A fiat payment delivered",
     does: [
-      "Holds USDC plus a little ETH for gas on Base",
+      "Holds USDC plus a little SOL for fees in a Solana wallet",
       "Checks platform and currency support",
       "Escrows USDC with recipient, amount, and rate",
       "Watches status; withdraws unclaimed USDC",

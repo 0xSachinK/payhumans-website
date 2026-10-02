@@ -50,7 +50,7 @@ export async function getJobs(id: string): Promise<LiveJob[]> {
   const client = protocolClient();
   const view = await client.getDeposit(BigInt(id));
   if (view.deposit.token.toLowerCase() !== USDC.toLowerCase())
-    throw new Error("This request does not use Base USDC.");
+    throw new Error("This request does not use USDC.");
   const catalog = getPaymentMethodsCatalog(CHAIN_ID, "production");
   const jobs: LiveJob[] = [];
   for (const method of view.paymentMethods) {

@@ -29,7 +29,7 @@ export default function WalletButton() {
       </button>
       {open && address && (
         <div className="absolute right-0 top-full mt-2 z-50 bg-[#151817] border border-white/15 rounded-xl p-4 w-64 shadow-xl">
-          <p className="text-xs text-[var(--muted)] mb-2">Your wallet · Base</p>
+          <p className="text-xs text-[var(--muted)] mb-2">Your PayHumans wallet</p>
           <code className="text-xs break-all block">{address}</code>
           <button
             className="text-sm underline my-3 block"

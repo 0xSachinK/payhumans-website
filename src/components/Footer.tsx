@@ -16,9 +16,8 @@ export default function Footer() {
             PayHumans<span className="text-[var(--muted)]">.ai</span>
           </span>
           <p className="text-xs text-[var(--muted)] max-w-md leading-relaxed">
-            An independent project. Escrow, payment verification, and payouts use Peer
-            protocol contracts on Base. Solana funding is planned, not live. This site does
-            not custody funds.
+            An independent project for Solana agents. Escrow, payment verification, and
+            payouts use the Peer protocol. This site does not custody funds.
           </p>
           <p className="text-xs text-[var(--muted)]">
             Prepared for{" "}

@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     if (!isAddress(body.account))
-      throw new Error("Connect a valid Base wallet.");
+      throw new Error("Connect a valid PayHumans wallet.");
     if (
       typeof body.amount !== "string" ||
       !/^\d+(?:\.\d{1,6})?$/.test(body.amount)

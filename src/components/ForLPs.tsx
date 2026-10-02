@@ -8,7 +8,7 @@ const paths = [
     Icon: AgentIcon,
     eyebrow: "Building an agent",
     title: "Give it a way to pay people in fiat.",
-    body: "Escrow Base USDC with the CLI today: query platforms, dry-run a request, then execute. Solana funding is planned.",
+    body: "Escrow Solana USDC with the CLI: query platforms, dry-run a request, then execute.",
     cta: "Agent quickstart",
     href: "/docs#quickstart",
     accent: "#60a5fa",

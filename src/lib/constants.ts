@@ -14,7 +14,7 @@ export const CLI = {
 export const CLI_QUICKSTART = `# Install with Node.js 22 or newer
 npm install -g payhumans-ai-cli@0.1.0
 
-# Requires USDC + a little ETH for gas in a Base wallet
+# Requires USDC + a little SOL for fees in a Solana wallet
 # Supported platforms and currencies (varies; always query)
 payhumans platforms
 
@@ -29,7 +29,7 @@ payhumans deposit create --platform venmo \\
 
 export const CLI_COMMANDS: { command: string; desc: string }[] = [
   { command: "payhumans platforms", desc: "List payment platforms and currencies currently supported." },
-  { command: "payhumans deposit create", desc: "Escrow Base USDC for a fiat payment. --amount is USDC, --rate is fiat per USDC." },
+  { command: "payhumans deposit create", desc: "Escrow Solana USDC for a fiat payment. --amount is USDC, --rate is fiat per USDC." },
   { command: "payhumans deposit show <id>", desc: "Check whether a request is open, claimed, or settled." },
   { command: "payhumans deposit withdraw --id <id> --amount 5", desc: "Reclaim USDC that has not been paid out." },
 ];
@@ -37,7 +37,7 @@ export const CLI_COMMANDS: { command: string; desc: string }[] = [
 export const FAQ = [
   {
     q: "What is PayHumans.ai?",
-    a: "A way for an AI agent holding USDC on Base to get a fiat payment delivered to someone. The agent escrows USDC and names a recipient. A human claims the request, pays the recipient from their own payment account, proves the payment, and receives the escrowed USDC.",
+    a: "A way for an AI agent holding USDC on Solana to get a fiat payment delivered to someone. The agent escrows USDC and names a recipient. A human claims the request, pays the recipient from their own payment account, proves the payment, and receives the escrowed USDC.",
   },
   {
     q: "Who spends what?",
@@ -60,15 +60,15 @@ export const FAQ = [
     a: "Fiat sent from your account cannot be pulled back by this site. If you pay the wrong recipient, the wrong amount, or after your claim expires, the proof may fail and the escrow will not pay you. Only claim requests you can complete inside the window, on a platform you already use.",
   },
   {
-    q: "Can my Solana agent use this today?",
-    a: "Not directly yet. Today an agent needs USDC on Base to create a request. PayHumans is being built with Solana agents in mind: funding from Solana USDC or SOL through a future Peer and Relay integration is planned but not available. Even then, escrow, claims, proofs, and payouts would remain on Base; there is no Solana escrow program.",
+    q: "Which tokens and chains are supported?",
+    a: "Solana USDC only. An agent funds every request with USDC from its Solana wallet. Other tokens are not accepted.",
   },
   {
-    q: "What does each chain need?",
-    a: "Today everything runs on Base: creating or withdrawing an escrow deposit needs USDC plus a little ETH for gas, and humans receive USDC on Base. Planned Solana funding would additionally need SOL for Solana network fees.",
+    q: "What does an agent need?",
+    a: "A Solana wallet holding the USDC it wants to escrow plus a little SOL for network fees, and a signing key kept in its environment.",
   },
   {
     q: "Who runs this?",
-    a: "PayHumans.ai is an independent project. Escrow and payment verification use Peer protocol contracts on Base; this site does not custody funds.",
+    a: "PayHumans.ai is an independent project. Escrow and payment verification use the Peer protocol; this site does not custody funds.",
   },
 ];

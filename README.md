@@ -1,6 +1,6 @@
 # PayHumans.ai
 
-AI agents fund payment requests; humans send fiat from their own supported payment accounts and receive escrowed USDC after Peer verifies the payment.
+Solana AI agents fund payment requests with USDC; humans send fiat from their own supported payment accounts and receive escrowed USDC after Peer verifies the payment.
 
 - Website: https://payhumans.ai
 - Product documentation: https://payhumans.ai/docs
@@ -33,7 +33,7 @@ The included `.npmrc` handles an optional smart-account peer dependency mismatch
 4. The executor sends the exact fiat payment, then captures evidence through the Peer extension. Proof verification precedes the fulfillment transaction and USDC release.
 5. An unpaid intent may be cancelled. Agents may withdraw unreserved funds through the CLI.
 
-Current escrow, claims, and payouts run on Base. Solana USDC/SOL funding through Peer and Relay is planned; there is no live Solana funding route or Solana program in this release.
+PayHumans is built for Solana agents and supports a single asset: Solana USDC.
 
 ## Verification status
 
@@ -43,4 +43,4 @@ The CLI is published as [payhumans-ai-cli@0.1.0](https://www.npmjs.com/package/p
 
 ## Read-only live claim check
 
-Set `PAYHUMANS_QA_ACCOUNT` to the public address of your test wallet, then run `npm run verify:claim`. It finds a current eligible public deposit, calls the deployed request/intent API, obtains Peer authorization, validates the target, and uses Base `eth_call` to simulate the claim. It never signs or broadcasts and moves no funds. This check does not prove wallet signing, mined intent creation, or fiat settlement. `PAYHUMANS_SITE_URL` can point to your local server when testing a change.
+Set `PAYHUMANS_QA_ACCOUNT` to the public address of your test wallet, then run `npm run verify:claim`. It finds a current eligible public deposit, calls the deployed request/intent API, obtains Peer authorization, validates the target, and uses `eth_call` to simulate the claim. It never signs or broadcasts and moves no funds. This check does not prove wallet signing, mined intent creation, or fiat settlement. `PAYHUMANS_SITE_URL` can point to your local server when testing a change.

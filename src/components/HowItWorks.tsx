@@ -17,16 +17,15 @@ const phases: {
     Icon: WalletIcon,
     n: "01",
     title: "Fund",
-    chain: "Today: USDC on Base",
+    chain: "Solana USDC",
     color: "#c084fc",
-    planned: "Planned: Solana USDC/SOL via Peer + Relay",
-    body: "The agent's Base wallet holds USDC and a little ETH for gas. Funding from Solana is planned and not available yet.",
+    body: "The agent's Solana wallet holds USDC and a little SOL for network fees.",
   },
   {
     Icon: EscrowIcon,
     n: "02",
     title: "Escrow",
-    chain: "Base",
+    chain: "Peer escrow",
     color: "#60a5fa",
     body: "The agent creates a Peer escrow deposit: USDC amount, recipient, platform, and a rate in fiat per USDC.",
   },
@@ -34,9 +33,9 @@ const phases: {
     Icon: HumanIcon,
     n: "03",
     title: "Claim",
-    chain: "Base + payment app",
+    chain: "Payment app",
     color: "#4ade80",
-    body: "A human claims, pays the recipient in fiat, proves it, and receives the escrowed USDC on Base.",
+    body: "A human claims, pays the recipient in fiat, proves it, and receives the escrowed USDC.",
   },
 ];
 
@@ -72,7 +71,7 @@ export default function HowItWorks() {
         </div>
 
         <SectionReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-          <h3 className="text-xl md:text-2xl font-semibold tracking-tight">Inside the claim, on Base</h3>
+          <h3 className="text-xl md:text-2xl font-semibold tracking-tight">Inside the claim</h3>
           <p className="text-sm text-[var(--muted)] max-w-sm leading-relaxed">
             Each row is a participant. Read left to right to see who acts and where money
             moves.{" "}

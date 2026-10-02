@@ -1,7 +1,7 @@
 {
   "name": "payhumans-ai-cli",
   "version": "0.1.0",
-  "description": "A focused CLI for AI agents to fund human-executed fiat payments with USDC on Base",
+  "description": "A focused CLI for Solana AI agents to fund human-executed fiat payments with Solana USDC",
   "type": "module",
   "bin": { "payhumans": "src/cli.js" },
   "files": ["src", "README.md", "LICENSE"],
@@ -11,5 +11,5 @@
   "license": "MIT",
   "homepage": "https://payhumans.ai/docs",
   "publishConfig": { "access": "public" },
-  "keywords": ["payhumans", "ai", "agents", "payments", "usdc", "base"]
+  "keywords": ["payhumans", "ai", "agents", "payments", "usdc", "solana"]
 }

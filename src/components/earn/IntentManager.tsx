@@ -93,7 +93,7 @@ export default function IntentManager({ hash }: { hash: string }) {
       throw new Error("Your wallet is getting ready. Try again shortly.");
     if (chainId !== 8453) {
       await switchChainAsync({ chainId: 8453 });
-      throw new Error("Switched to Base. Retry the action.");
+      throw new Error("Switched network. Retry the action.");
     }
     const fresh = await refresh();
     if (fresh.owner?.toLowerCase() !== address.toLowerCase())
