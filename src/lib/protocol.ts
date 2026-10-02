@@ -23,6 +23,7 @@ export function protocolClient(
     walletClient,
     chainId: CHAIN_ID,
     runtimeEnv: "production",
+    baseApiUrl: "https://api.zkp2p.xyz",
     rpcUrl,
   });
 }

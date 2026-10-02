@@ -102,6 +102,7 @@ export default function IntentManager({ hash }: { hash: string }) {
       walletClient: wallet,
       chainId: 8453,
       runtimeEnv: "production",
+      baseApiUrl: "https://api.zkp2p.xyz",
       rpcUrl: "https://mainnet.base.org",
     });
   }

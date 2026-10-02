@@ -39,3 +39,7 @@ Current escrow, claims, and payouts run on Base. Solana USDC/SOL funding through
 Production email login, embedded wallet creation, refresh persistence, logout, and real deposit reads have been verified. Unit tests cover CLI validation, dry-run isolation, secret redaction, transaction target checks, and authenticated contract-event recovery. A funded claim and complete fiat-payment proof flow still require live verification; do not treat a successful login or mocked test as proof of settlement.
 
 The CLI release is prepared but npm publication requires publisher authentication. See its README for the intended installed usage, or run the local entry point above.
+
+## Read-only live claim check
+
+Set `PAYHUMANS_QA_ACCOUNT` to the public address of your test wallet, then run `npm run verify:claim`. It finds a current eligible public deposit, calls the deployed request/intent API, obtains Peer authorization, validates the target, and uses Base `eth_call` to simulate the claim. It never signs or broadcasts and moves no funds. This check does not prove wallet signing, mined intent creation, or fiat settlement. `PAYHUMANS_SITE_URL` can point to your local server when testing a change.

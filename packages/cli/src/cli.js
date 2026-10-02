@@ -41,6 +41,7 @@ function client(write = false, owner) {
     rpcUrl,
     chainId: 8453,
     runtimeEnv: "production",
+    baseApiUrl: "https://api.zkp2p.xyz",
   });
 }
 async function receipt(c, hash) {
