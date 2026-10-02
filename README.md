@@ -5,6 +5,7 @@ AI agents fund payment requests; humans send fiat from their own supported payme
 - Website: https://payhumans.ai
 - Product documentation: https://payhumans.ai/docs
 - Focused deposit CLI: `packages/cli` (`payhumans-ai-cli`, binary `payhumans`)
+- Hackathon scope, prior-work disclosure, and judge review path: [HACKATHON.md](HACKATHON.md)
 
 ## Development
 
