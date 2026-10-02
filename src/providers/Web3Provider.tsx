@@ -26,7 +26,8 @@ export const PAYHUMANS_PRIVY_CONFIG = {
   supportedChains: [base],
   embeddedWallets: {
     ethereum: { createOnLogin: "all-users" },
-    showWalletUIs: true,
+    // The claim and intent screens already show a review step before every transaction.
+    showWalletUIs: false,
   },
   externalWallets: {
     disableAllExternalWallets: true,

@@ -1,15 +1,43 @@
 {
   "name": "payhumans-ai-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A focused CLI for Solana AI agents to fund human-executed fiat payments with Solana USDC",
   "type": "module",
-  "bin": { "payhumans": "src/cli.js" },
-  "files": ["src", "README.md", "LICENSE"],
-  "engines": { "node": ">=22" },
-  "scripts": { "test": "node --test", "prepublishOnly": "npm test" },
-  "dependencies": { "@zkp2p/sdk": "0.14.4", "commander": "14.0.3", "viem": "2.55.19" },
+  "bin": {
+    "payhumans": "src/cli.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "@relayprotocol/relay-sdk": "7.0.3",
+    "@relayprotocol/relay-svm-wallet-adapter": "21.0.4",
+    "@solana/web3.js": "1.98.4",
+    "@zkp2p/cash": "0.6.2",
+    "@zkp2p/sdk": "0.14.4",
+    "commander": "14.0.3",
+    "viem": "2.55.19"
+  },
   "license": "MIT",
   "homepage": "https://payhumans.ai/docs",
-  "publishConfig": { "access": "public" },
-  "keywords": ["payhumans", "ai", "agents", "payments", "usdc", "solana"]
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "payhumans",
+    "ai",
+    "agents",
+    "payments",
+    "usdc",
+    "solana"
+  ]
 }

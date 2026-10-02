@@ -32,17 +32,19 @@ const toc = [
 
 const discover = `${CLI.bin} platforms`;
 
-const create = `# Dry run (default): prints what would be escrowed, sends nothing
+const wallet = `${CLI.bin} wallet    # Solana USDC + SOL balances`;
+
+const create = `# Dry run (default): shows the Solana USDC cost and route fees, sends nothing
 ${CLI.bin} deposit create --platform venmo \\
   --recipient '<handle>' --amount 5 --currency USD --rate 0.98
 
-# Execute. Signer is read from PAYHUMANS_PRIVATE_KEY or DEPLOYER_KEY
+# Execute: funds the escrow from your Solana wallet, then opens the request
 ${CLI.bin} deposit create --platform venmo --recipient '<handle>' \\
-  --amount 5 --currency USD --rate 0.98 --yes`;
+  --amount 5 --currency USD --rate 0.98 --max-spend 5.5 --yes`;
 
 const manage = `${CLI.bin} deposit show <deposit-id>
-${CLI.bin} deposit withdraw --id <deposit-id> --amount 5          # dry run
-${CLI.bin} deposit withdraw --id <deposit-id> --amount 5 --yes`;
+${CLI.bin} deposit withdraw --id <deposit-id>          # dry run
+${CLI.bin} deposit withdraw --id <deposit-id> --yes    # USDC returns to your Solana wallet`;
 
 function Callout({ children }: { children: React.ReactNode }) {
   return (
@@ -174,15 +176,16 @@ export default function DocsPage() {
               </p>
               <h3>1. Install</h3>
               <p>
-                Requires Node.js 22 or newer. Version 0.1.0 is available on{" "}
+                Requires Node.js 22 or newer. Available on{" "}
                 <a href="https://www.npmjs.com/package/payhumans-ai-cli">npm</a>.
               </p>
-              <div className="mt-3"><CodeBlock title="install">{"npm install -g payhumans-ai-cli@0.1.0\npayhumans --help"}</CodeBlock></div>
+              <div className="mt-3"><CodeBlock title="install">{"npm install -g payhumans-ai-cli\npayhumans --help"}</CodeBlock></div>
               <h3>2. Fund a Solana wallet</h3>
               <p>
                 Hold USDC plus a little SOL for network fees in the Solana wallet whose key the
-                CLI will use.
+                CLI will use. Route fees are a few cents per request, paid in Solana USDC.
               </p>
+              <div className="mt-3"><CodeBlock title="wallet">{wallet}</CodeBlock></div>
               <h3>3. Check what is supported</h3>
               <p>Platform and currency support varies and can change. Query it every time rather than hard-coding a list.</p>
               <div className="mt-3"><CodeBlock title="discover">{discover}</CodeBlock></div>
@@ -195,13 +198,14 @@ export default function DocsPage() {
               <div className="mt-3"><CodeBlock title="create">{create}</CodeBlock></div>
               <Callout>
                 <p>
-                  Set <code>PAYHUMANS_PRIVATE_KEY</code> (or <code>DEPLOYER_KEY</code>) in the
-                  agent&apos;s environment through your secret manager. Never paste a key into
-                  a prompt, a command line argument, or this site.
+                  Set <code>PAYHUMANS_SOLANA_KEY</code> (base58 or JSON array) or{" "}
+                  <code>PAYHUMANS_SOLANA_KEY_FILE</code> in the agent&apos;s environment through
+                  your secret manager. Never paste a key into a prompt, a command line argument,
+                  or this site.
                 </p>
               </Callout>
               <h3>5. Share, track, and withdraw</h3>
-              <p>The CLI returns a claim URL after the deposit confirms. Share it with the human executor. Requests are loaded by deposit ID; this version does not provide a global job marketplace.</p>
+              <p>The CLI returns a claim URL after the deposit confirms. Share it with the human executor. Requests are loaded by deposit ID; this version does not provide a global job marketplace. Withdrawing sends unclaimed USDC back to your Solana wallet.</p>
               <div className="mt-3"><CodeBlock title="manage">{manage}</CodeBlock></div>
             </section>
 

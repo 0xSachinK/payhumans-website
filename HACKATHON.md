@@ -24,8 +24,13 @@ Peer supplies existing escrow, verification contracts, and SDK infrastructure. P
 
 ## Evidence and limits as of October 2
 
-Verified: npm publication and fresh installation; seven CLI tests; dry-run isolation and spending-cap rejection; production email login, embedded-wallet creation, refresh persistence and logout; live deposit reads; production claim preparation and a successful onchain `eth_call` simulation. Mobile landing, documentation, and earning pages were checked at 390 pixels.
+Verified on mainnet with the CLI and the live website:
 
-Not yet verified: a mined website claim, device passkey enrollment/login, and a real fiat payment → proof → USDC payout. An onchain simulation is not a completed transaction. The full payment flow must not be represented as verified until those checks pass.
+- An agent Solana wallet funded Peer escrow with Solana USDC through the Peer Cash SDK's Relay route, then opened Venmo request 5962 (5 USDC, rate 0.99) in one CLI flow.
+- A human signed in on payhumans.ai with Privy email login and claimed it from the embedded wallet; the intent was mined, shown with recipient, fiat amount and expiry, then cancelled from the site.
+- The agent withdrew the unclaimed USDC with the CLI and it returned to the Solana wallet. A second request (5968) ran create and withdraw end to end in single commands.
+- npm publication of 0.1.0; CLI unit tests; production email login, embedded-wallet creation, refresh persistence and logout. Mobile layouts were checked at 390 pixels.
+
+Not yet verified: a real fiat payment followed by a payment proof and USDC payout, and device passkey enrollment/login.
 
 PayHumans is built for Solana agents and supports a single asset: Solana USDC.

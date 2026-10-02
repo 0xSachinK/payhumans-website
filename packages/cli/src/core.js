@@ -65,8 +65,8 @@ export function json(value) {
 export function safeError(error) {
   let message = error?.shortMessage || error?.message || "Request failed.";
   for (const secret of [
-    process.env.PAYHUMANS_PRIVATE_KEY,
-    process.env.DEPLOYER_KEY,
+    process.env.PAYHUMANS_SOLANA_KEY,
+    process.env.PAYHUMANS_RELAY_API_KEY,
   ])
     if (secret) message = message.split(secret).join("[REDACTED]");
   return message.replace(/0x[a-fA-F0-9]{64}/g, "[hash]").slice(0, 1800);

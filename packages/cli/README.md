@@ -7,24 +7,32 @@ Requires Node.js 22 or newer.
 ```sh
 npm install -g payhumans-ai-cli
 payhumans platforms
+payhumans wallet
 payhumans deposit create --platform venmo --recipient '<recipient-handle>' --amount 5 --currency USD --rate 0.98
 ```
 
-`--amount` is USDC escrowed. `--rate` is fiat units per USDC: 5 USDC at 0.98 USD/USDC asks the executor to send $4.90. Platform/protocol fees and wallet gas can affect actual net proceeds. The default minimum and maximum claim size equal the full deposit; use `--min` and `--max` for partial requests.
+`--amount` is USDC escrowed. `--rate` is fiat units per USDC: 5 USDC at 0.98 USD/USDC asks the executor to send $4.90. The default minimum and maximum claim size equal the full deposit; use `--min` and `--max` for partial requests.
 
-Every write is a preview unless `--yes` is supplied. Previews do not sign, broadcast, or register recipient details. Execution reads `PAYHUMANS_PRIVATE_KEY` (or `DEPLOYER_KEY`) from the environment, registers the recipient with the underlying protocol, approves only the requested amount if necessary, and creates escrow. Never paste keys into command arguments or files. The RPC chain is checked before any write.
+## Keys and funding
+
+Set `PAYHUMANS_SOLANA_KEY` (base58 secret or Solana CLI JSON array) or `PAYHUMANS_SOLANA_KEY_FILE` through your secret manager. Never paste keys into command arguments or files. The wallet needs the USDC to escrow plus a little SOL for Solana network fees.
+
+`deposit create --yes` moves Solana USDC into Peer escrow through the Peer Cash SDK's Relay route. Your escrow account is derived from your Solana key, so the agent manages a single secret; `payhumans wallet` shows both. Route fees are paid in Solana USDC and shown in the preview. `PAYHUMANS_SOLANA_RPC_URL` and `PAYHUMANS_ESCROW_RPC_URL` optionally override the RPC endpoints; `PAYHUMANS_RELAY_API_KEY` is optional.
+
+Every write is a preview unless `--yes` is supplied. Previews do not sign, broadcast, or register recipient details.
 
 ```sh
-# Configure your signer through your existing secret manager first.
-payhumans deposit create --platform venmo --recipient '<recipient-handle>' --amount 5 --currency USD --rate 0.98 --max-spend 5 --yes
+payhumans deposit create --platform venmo --recipient '<recipient-handle>' --amount 5 --currency USD --rate 0.98 --max-spend 5.5 --yes
 payhumans deposit show 123
-payhumans deposit list --owner 0xYourAddress
-payhumans deposit withdraw --id 123 --amount 5
-payhumans deposit withdraw --id 123 --amount 5 --yes
+payhumans deposit list
+payhumans deposit withdraw --id 123 --yes      # unclaimed USDC returns to your Solana wallet
+payhumans return --yes                         # move any USDC left in the escrow account back to Solana
 ```
 
-`--max-spend` caps deposited USDC, not gas or cumulative spending across commands. Maintain a separate total budget. A transaction hash is emitted immediately after broadcast. Reconcile it onchain before retrying a timeout. Confirmed deposits return a direct `https://payhumans.ai/earn?deposit=…` link for a human to claim. Requests are shared by link or deposit ID; the website does not automatically aggregate every protocol deposit.
+`--max-spend` caps the total Solana USDC spent on one deposit, including route fees. Maintain a separate total budget. Hashes and Relay request IDs are emitted as soon as they exist; reconcile them before retrying a timeout. Confirmed deposits return a direct `https://payhumans.ai/earn?deposit=…` link for a human to claim.
 
-The human signs in with email or a passkey to create a Privy wallet, claims on the website, sends the fiat from their own account, and proves payment. A claim is not proof or a payout. Deposits and outstanding intents can be inspected with `deposit show`; withdrawal is limited to available funds owned by the signer. Platform availability and recipient identity requirements are determined by the protocol, and some platforms require prior identity verification.
+By default the CLI turns off dispute protection on new deposits so any signed-in human can claim without posting stake; the agent accepts payment-reversal risk. Pass `--require-stake` to keep it on. `deposit open-claims --id <id> --platform <name> --yes` applies the same setting to an existing deposit.
 
-This independent PayHumans project uses Peer escrow and SDK infrastructure. Its focused deposit workflow was developed against the latest Peer CLI 0.4.1 command behavior and SDK 0.14.4. It intentionally has no swap, vault, transfer, market-making, or broad MCP surface.
+The human signs in with email or a passkey to create a PayHumans wallet, claims on the website, sends the fiat from their own account, and proves payment. A claim is not proof or a payout. Platform availability and recipient identity requirements are determined by the protocol, and some platforms require prior identity verification.
+
+This independent PayHumans project uses Peer escrow, the Peer SDK, and the Peer Cash SDK. It intentionally has no swap, vault, transfer, market-making, or broad MCP surface.
