@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useCallback } from "react";
 
 function hl(code: string, lang: string): string {
+  code = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   if (lang === "json") return hlJSON(code);
   if (lang === "typescript") return hlTS(code);
   return hlBash(code);
@@ -16,7 +17,7 @@ function hlBash(code: string): string {
     return l
       .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="s-str">$1</span>')
       .replace(/(--[\w-]+)/g, '<span class="s-flag">$1</span>')
-      .replace(/\b(peer|npm|npx)\b(\s+)([\w-]+)/g, '<span class="s-kw">$1</span>$2<span class="s-cmd">$3</span>')
+      .replace(/\b(payhumans|npm|npx)\b(\s+)([\w-]+)/g, '<span class="s-kw">$1</span>$2<span class="s-cmd">$3</span>')
       .replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="s-val">$1</span>');
   }).join("\n");
 }

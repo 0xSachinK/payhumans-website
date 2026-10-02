@@ -1,49 +1,64 @@
-"use client";
-
+import Link from "next/link";
 import SectionReveal from "./SectionReveal";
-import { CAPABILITIES } from "@/lib/constants";
+import { AlertIcon, ClockIcon, ProofIcon, WalletIcon } from "./diagrams/Icons";
+import StateDiagram from "./diagrams/StateDiagram";
+
+const limits = [
+  {
+    Icon: WalletIcon,
+    title: "Settles on Base",
+    body: "Requests are USDC escrows on Base and need ETH for gas. Solana USDC/SOL funding is planned, not live; settlement would stay on Base.",
+  },
+  {
+    Icon: ProofIcon,
+    title: "Platform support varies",
+    body: "Which payment apps and currencies work depends on the platform and can change. Query it with payhumans platforms.",
+  },
+  {
+    Icon: ClockIcon,
+    title: "Claims expire",
+    body: "A claim has a time limit. If no valid proof arrives in time, the USDC goes back to the open request.",
+  },
+  {
+    Icon: AlertIcon,
+    title: "Fiat can't be clawed back here",
+    body: "If a human pays the wrong recipient or amount, or proves too late, the escrow does not pay out.",
+  },
+];
 
 export default function Capabilities() {
   return (
-    <section id="capabilities" className="py-20 md:py-32 px-6">
+    <section id="limits" className="py-20 md:py-28 px-6 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
-        <SectionReveal>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
-            Status
-          </p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
-            What agents can do today.
-          </h2>
-          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-16 text-base">
-            Production-ready. Battle-tested on $20M+ volume.
-          </p>
+        <SectionReveal className="max-w-2xl mb-12">
+          <p className="eyebrow mb-4">Expiry, cancellation, limits</p>
+          <h2 className="section-title">What can go wrong, and what happens then.</h2>
         </SectionReveal>
 
+        <SectionReveal className="mb-6">
+          <StateDiagram />
+        </SectionReveal>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {limits.map(({ Icon, title, body }, i) => (
+            <SectionReveal key={title} delay={i * 0.05}>
+              <div className="frost h-full p-5">
+                <Icon size={18} className="text-[var(--secondary)] mb-4" />
+                <h3 className="text-sm font-semibold mb-1.5">{title}</h3>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">{body}</p>
+              </div>
+            </SectionReveal>
+          ))}
+        </div>
+
         <SectionReveal>
-          <div className="frost overflow-hidden hover:!transform-none">
-            <div className="grid gap-0 divide-y divide-white/[0.04]">
-              {CAPABILITIES.map((c) => (
-                <div
-                  key={c.name}
-                  className="cap-row flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] group"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <span
-                      className={c.status === "live" ? "badge-live" : "badge-soon"}
-                    >
-                      {c.status === "live" ? "Live" : "Soon"}
-                    </span>
-                    <span className="text-sm font-medium truncate group-hover:text-white transition-colors">
-                      {c.name}
-                    </span>
-                  </div>
-                  <code className="text-[11px] font-mono text-[var(--muted)] hidden sm:block truncate ml-4 bg-white/[0.03] px-2.5 py-1 rounded">
-                    {c.command}
-                  </code>
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="mt-8 text-xs text-[var(--muted)] max-w-2xl leading-relaxed">
+            Status: the full claim, pay, prove, and release loop has not yet been verified
+            end to end with a real payment through this site.{" "}
+            <Link href="/docs#verification" className="underline underline-offset-4 decoration-white/20 text-[var(--secondary)]">
+              Verification limits
+            </Link>
+          </p>
         </SectionReveal>
       </div>
     </section>

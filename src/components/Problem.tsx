@@ -1,55 +1,41 @@
-"use client";
-
 import SectionReveal from "./SectionReveal";
+import { AgentIcon, HumanIcon, RecipientIcon } from "./diagrams/Icons";
 
-const items = [
+const points = [
   {
-    icon: "0x",
-    title: "Agents live on-chain",
-    desc: "Wallets, USDC, instant settlement. But $150T of the global economy still runs on fiat rails.",
+    Icon: AgentIcon,
+    title: "Agents can hold USDC",
+    body: "A wallet and a private key are enough to hold and move stablecoins onchain.",
   },
   {
-    icon: "ID",
-    title: "Banks require identity",
-    desc: "KYC, identity docs, physical addresses. Software can\u2019t satisfy any of these. No bank account = no fiat.",
+    Icon: RecipientIcon,
+    title: "Recipients want fiat",
+    body: "A landlord, a tutor, a freelancer: most people expect a Venmo, bank, or wallet-app payment.",
   },
   {
-    icon: "//",
-    title: "Solutions are centralized",
-    desc: "MoonPay, Visa, Google AP2 \u2014 all gate on human KYC. There\u2019s no permissionless path. Until now.",
+    Icon: HumanIcon,
+    title: "Humans already have the rails",
+    body: "People with payment accounts can make that transfer and take USDC in return.",
   },
 ];
 
 export default function Problem() {
   return (
-    <section className="py-20 md:py-32 px-6">
+    <section className="py-20 md:py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionReveal>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
-            The Problem
-          </p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
-            AI agents can&apos;t open
-            <br />
-            <span className="text-[var(--muted)]">bank accounts.</span>
+        <SectionReveal className="max-w-2xl mb-12">
+          <p className="eyebrow mb-4">The gap</p>
+          <h2 className="section-title">
+            Agents can sign transactions. They can&apos;t send a Venmo.
           </h2>
-          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-20 text-base">
-            Every payment protocol solves crypto-to-crypto.
-            Nobody solves the fiat bridge.
-          </p>
         </SectionReveal>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((it, i) => (
-            <SectionReveal key={it.title} delay={i * 0.1}>
-              <div className="frost p-8 h-full">
-                <div className="w-10 h-10 rounded-lg bg-[var(--accent)]/[0.08] border border-[var(--accent)]/[0.15] flex items-center justify-center text-sm text-[var(--accent)] font-mono font-bold mb-5">
-                  {it.icon}
-                </div>
-                <h3 className="text-lg font-semibold mb-3">{it.title}</h3>
-                <p className="text-sm text-[var(--secondary)] leading-relaxed">
-                  {it.desc}
-                </p>
+        <div className="grid md:grid-cols-3 gap-4">
+          {points.map(({ Icon, title, body }, i) => (
+            <SectionReveal key={title} delay={i * 0.06}>
+              <div className="frost h-full p-6">
+                <Icon size={22} className="text-[var(--secondary)] mb-5" />
+                <h3 className="text-base font-semibold mb-2">{title}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{body}</p>
               </div>
             </SectionReveal>
           ))}

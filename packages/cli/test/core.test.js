@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {decimal,validateCreate,depositId,safeError} from '../src/core.js';
+const request={platform:'venmo',recipient:'example-recipient',amount:'5',currency:'USD',rate:'0.98'};
+test('keeps exact amounts and bounds the claim to the funded deposit',()=>{const r=validateCreate(request);assert.equal(r.amount,5_000_000n);assert.equal(r.rate,980000000000000000n);assert.equal(r.min,r.amount);assert.equal(r.max,r.amount);});
+test('rejects malformed, rounded, negative, zero and exponential amounts',()=>{for(const amount of ['0','-1','NaN','Infinity','1e4','1.0000001','0x10',' 5',''])assert.throws(()=>decimal(amount,'amount'));});
+test('rejects unsupported platform/currency and inconsistent claim ranges',()=>{for(const change of [{platform:'unknown'},{currency:'EUR'},{min:'6'},{max:'6'},{min:'4',max:'3'},{recipient:''},{maxSpend:'4.99'}])assert.throws(()=>validateCreate({...request,...change}));});
+test('accepts explicit USD cap equality and normalizes names',()=>{assert.equal(validateCreate({...request,platform:'VENMO',currency:'usd',maxSpend:'5'}).platform,'venmo');});
+test('rejects nonintegral and signed deposit IDs',()=>{for(const id of ['-1','1.1','1e3',''])assert.throws(()=>depositId(id));assert.equal(depositId('0'),0n);});
+test('redacts signing material from errors',()=>{const before=process.env.PAYHUMANS_PRIVATE_KEY;process.env.PAYHUMANS_PRIVATE_KEY='secret-fixture';assert.equal(safeError(Error('failed secret-fixture')),'failed [REDACTED]');if(before===undefined)delete process.env.PAYHUMANS_PRIVATE_KEY;else process.env.PAYHUMANS_PRIVATE_KEY=before;});
+test('default create is a keyless offline preview and unsupported arguments fail closed',()=>{const env={...process.env,PAYHUMANS_PRIVATE_KEY:'',DEPLOYER_KEY:'',PAYHUMANS_RPC_URL:'http://127.0.0.1:1'};const args=['src/cli.js','deposit','create','--platform','venmo','--recipient','example','--amount','5','--currency','USD','--rate','0.98'];const result=spawnSync(process.execPath,args,{env,encoding:'utf8'});assert.equal(result.status,0,result.stderr);assert.equal(JSON.parse(result.stdout).mode,'preview');assert.equal(spawnSync(process.execPath,[...args,'--yes'],{env,encoding:'utf8'}).status,1);assert.notEqual(spawnSync(process.execPath,['src/cli.js','transfer'],{env,encoding:'utf8'}).status,0);});

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import WalletButton from "./WalletButton";
 import Link from "next/link";
 import { LINKS } from "@/lib/constants";
 
 const links = [
-  { label: "How it works", href: "#how-it-works-earn" },
+  { label: "How it works", href: "/docs#humans" },
   { label: "Jobs", href: "#jobs" },
   { label: "For Agents", href: "/" },
 ];
@@ -33,7 +33,9 @@ export default function EarnNavigation() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-md bg-[var(--green)] flex items-center justify-center">
-            <span className="text-[#050505] font-mono text-xs font-bold">P</span>
+            <span className="text-[#050505] font-mono text-xs font-bold">
+              P
+            </span>
           </div>
           <span className="font-semibold text-sm tracking-tight">
             PayHumans<span className="text-[var(--green)]">.ai</span>
@@ -56,11 +58,7 @@ export default function EarnNavigation() {
           >
             Docs
           </a>
-          <ConnectButton
-            chainStatus="icon"
-            showBalance={false}
-            accountStatus="avatar"
-          />
+          <WalletButton />
         </div>
 
         <button
@@ -68,8 +66,12 @@ export default function EarnNavigation() {
           onClick={() => setOpen(!open)}
           aria-label="Menu"
         >
-          <span className={`block w-5 h-px bg-[var(--fg)] transition-all ${open ? "rotate-45 translate-y-[3.5px]" : ""}`} />
-          <span className={`block w-5 h-px bg-[var(--fg)] transition-all ${open ? "-rotate-45 -translate-y-[3.5px]" : ""}`} />
+          <span
+            className={`block w-5 h-px bg-[var(--fg)] transition-all ${open ? "rotate-45 translate-y-[3.5px]" : ""}`}
+          />
+          <span
+            className={`block w-5 h-px bg-[var(--fg)] transition-all ${open ? "-rotate-45 -translate-y-[3.5px]" : ""}`}
+          />
         </button>
       </div>
 
@@ -83,12 +85,17 @@ export default function EarnNavigation() {
           >
             <div className="px-6 py-4 flex flex-col gap-3">
               {links.map((l) => (
-                <a key={l.href} href={l.href} className="text-sm text-[var(--secondary)] py-2" onClick={() => setOpen(false)}>
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="text-sm text-[var(--secondary)] py-2"
+                  onClick={() => setOpen(false)}
+                >
                   {l.label}
                 </a>
               ))}
               <div className="mt-2">
-                <ConnectButton />
+                <WalletButton />
               </div>
             </div>
           </motion.div>

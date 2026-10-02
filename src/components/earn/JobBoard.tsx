@@ -1,144 +1,193 @@
 "use client";
-
-import { useState, useMemo } from "react";
-import SectionReveal from "../SectionReveal";
-import JobCard from "./JobCard";
+import { useEffect, useState } from "react";
+import type { LiveJob } from "@/lib/protocol";
 import ClaimModal from "./ClaimModal";
-import { MOCK_JOBS, PLATFORMS, CURRENCIES, SORT_OPTIONS, type PaymentJob, type SortOption } from "@/lib/mock-jobs";
-
+import IntentManager from "./IntentManager";
+import ClaimRecovery from "./ClaimRecovery";
+import type { Hex } from "viem";
 export default function JobBoard() {
-  const [platform, setPlatform] = useState<string>("All");
-  const [currency, setCurrency] = useState<string>("All");
-  const [sort, setSort] = useState<SortOption>("earnings");
-  const [claimJob, setClaimJob] = useState<PaymentJob | null>(null);
-
-  const filtered = useMemo(() => {
-    const jobs = MOCK_JOBS.filter((j) => {
-      if (platform !== "All" && j.platform !== platform) return false;
-      if (currency !== "All" && j.currency !== currency) return false;
-      return true;
-    });
-
-    return jobs.toSorted((a, b) => {
-      if (sort === "earnings") return b.earningsNum - a.earningsNum;
-      if (sort === "newest") return a.createdAtMin - b.createdAtMin;
-      return parseFloat(b.amount.replace(/,/g, "")) - parseFloat(a.amount.replace(/,/g, ""));
-    });
-  }, [platform, currency, sort]);
-
+  const [pendingClaim, setPendingClaim] = useState<Hex>();
+  const [recoveredIntent, setRecoveredIntent] = useState("");
+  const [id, setId] = useState("");
+  const [jobs, setJobs] = useState<LiveJob[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState<LiveJob | null>(null);
+  async function load(deposit: string) {
+    setLoading(true);
+    setError("");
+    setJobs([]);
+    try {
+      const r = await fetch(`/api/jobs?deposit=${encodeURIComponent(deposit)}`);
+      const body = await r.json();
+      if (!r.ok) throw new Error(body.error);
+      setJobs(body.jobs);
+      if (!body.jobs.length)
+        setError("No supported payment methods were found for this deposit.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to load request.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    const pending = new URLSearchParams(window.location.search).get("claimTx");
+    if (pending && /^0x[a-fA-F0-9]{64}$/.test(pending))
+      setPendingClaim(pending as Hex);
+    const saved = new URLSearchParams(window.location.search).get("intent");
+    if (saved && /^0x[a-fA-F0-9]{64}$/.test(saved)) setRecoveredIntent(saved);
+    const deposit = new URLSearchParams(window.location.search).get("deposit");
+    if (deposit) {
+      setId(deposit);
+      void load(deposit);
+    }
+  }, []);
   return (
-    <>
-      <section id="jobs" className="py-20 md:py-28 px-6">
-        <div className="max-w-6xl mx-auto">
-          <SectionReveal>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--green)] font-mono mb-3">
-                  Job Board
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-                  Available payment requests
-                </h2>
-                <p className="text-sm text-[var(--muted)]">
-                  {filtered.length} open{" "}
-                  {filtered.length === 1 ? "job" : "jobs"} from AI agents
-                  waiting for execution
-                </p>
+    <section id="jobs" className="px-6 py-16">
+      <div className="max-w-5xl mx-auto">
+        {pendingClaim && (
+          <ClaimRecovery
+            hash={pendingClaim}
+            onRecovered={(intent) => {
+              setPendingClaim(undefined);
+              setRecoveredIntent(intent);
+            }}
+          />
+        )}
+        {recoveredIntent && !selected && (
+          <IntentManager hash={recoveredIntent} />
+        )}
+        <p className="text-xs tracking-widest uppercase text-[var(--green)] mb-3">
+          Payment requests
+        </p>
+        <h2 className="text-3xl md:text-4xl font-semibold mb-4">
+          Find your next payment job.
+        </h2>
+        <p className="text-[var(--muted)] max-w-2xl mb-7">
+          Open the request link shared by an agent, or enter its deposit ID.
+          Every request below is read from USDC escrow on Base. Check the
+          recipient and payment terms before claiming.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void load(id);
+          }}
+          className="flex flex-wrap gap-3 mb-8"
+        >
+          <label className="sr-only" htmlFor="deposit-id">
+            Deposit ID
+          </label>
+          <input
+            id="deposit-id"
+            inputMode="numeric"
+            pattern="[0-9]+"
+            required
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            placeholder="Enter deposit ID"
+            className="bg-white/5 border border-white/15 rounded-xl px-4 py-3 min-w-0 flex-1"
+          />
+          <button
+            disabled={loading}
+            className="bg-[var(--green)] text-black font-medium rounded-xl px-5 py-3 disabled:opacity-50"
+          >
+            {loading ? "Loading…" : "Find request"}
+          </button>
+        </form>
+        {error && (
+          <p
+            role="alert"
+            className="p-4 border border-amber-500/30 text-amber-200 rounded-xl"
+          >
+            {error}
+          </p>
+        )}
+        {!jobs.length && !loading && !error && (
+          <div className="rounded-2xl border border-white/10 p-8">
+            <h3 className="font-medium mb-2">Have a request link?</h3>
+            <p className="text-sm text-[var(--muted)]">
+              Agents create funded requests with the PayHumans CLI and share a
+              direct claim link. No sample jobs or simulated balances are
+              displayed here.
+            </p>
+            <a
+              href="/docs#quickstart"
+              className="inline-block text-[var(--green)] mt-4"
+            >
+              Create a request →
+            </a>
+          </div>
+        )}
+        <div className="grid md:grid-cols-2 gap-5">
+          {jobs.map((job) => (
+            <article
+              key={job.id}
+              className="rounded-2xl border border-white/10 p-6 bg-white/[0.02]"
+            >
+              <div className="flex justify-between mb-5">
+                <span className="capitalize text-lg font-medium">
+                  {job.platform}
+                </span>
+                <span className="text-xs text-[var(--muted)]">Base · USDC</span>
               </div>
-
-              <div className="flex items-center gap-2">
-                <div className="inline-flex items-center gap-1 px-1 py-1 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-                  <span className="text-[10px] text-[var(--muted)] px-2">
-                    Live
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--green)] animate-pulse mr-2" />
-                </div>
+              <div className="text-3xl font-semibold mb-1">
+                {job.available}{" "}
+                <span className="text-sm text-[var(--muted)]">
+                  USDC available
+                </span>
               </div>
-            </div>
-          </SectionReveal>
-
-          {/* Filters */}
-          <SectionReveal delay={0.05}>
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              {/* Platform filter */}
-              <div className="flex flex-wrap gap-2">
-                {PLATFORMS.map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPlatform(p)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      platform === p
-                        ? "bg-[var(--green)]/15 text-[var(--green)] border border-[var(--green)]/25"
-                        : "bg-white/[0.02] text-[var(--muted)] border border-white/[0.06] hover:border-white/[0.12] hover:text-[var(--secondary)]"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-
-              {/* Currency filter */}
-              <div className="flex flex-wrap gap-2 sm:ml-auto">
-                {CURRENCIES.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setCurrency(c)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
-                      currency === c
-                        ? "bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/25"
-                        : "bg-white/[0.02] text-[var(--muted)] border border-white/[0.06] hover:border-white/[0.12] hover:text-[var(--secondary)]"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sort */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">Sort:</span>
-              {SORT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setSort(opt.value)}
-                  className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
-                    sort === opt.value
-                      ? "bg-white/[0.06] text-[var(--fg)] border border-white/[0.1]"
-                      : "text-[var(--muted)] hover:text-[var(--secondary)]"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </SectionReveal>
-
-          {/* Job Grid */}
-          {filtered.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((job, i) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  index={i}
-                  onClaim={setClaimJob}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 rounded-2xl border border-white/[0.04] bg-white/[0.01]">
-              <p className="text-[var(--muted)] text-sm">
-                No jobs match your filters. Try broadening your search.
+              <p className="text-sm text-[var(--muted)] mb-5">
+                Send {job.rate} {job.currency} per USDC claimed
               </p>
-            </div>
-          )}
+              <dl className="text-sm space-y-3 mb-6">
+                <div>
+                  <dt className="text-[var(--muted)]">Recipient</dt>
+                  <dd className="break-all">{job.recipient}</dd>
+                </div>
+                <div>
+                  <dt className="text-[var(--muted)]">Claim range</dt>
+                  <dd>
+                    {job.min}–{job.max} USDC
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[var(--muted)]">Deposit</dt>
+                  <dd>
+                    #{job.depositId} · {job.owner.slice(0, 6)}…
+                    {job.owner.slice(-4)}
+                  </dd>
+                </div>
+              </dl>
+              <button
+                onClick={() => setSelected(job)}
+                disabled={!job.accepting || !!pendingClaim}
+                className="w-full bg-[var(--green)] rounded-xl text-black py-3 font-medium disabled:opacity-40"
+              >
+                {pendingClaim
+                  ? "Recover submitted claim first"
+                  : job.accepting
+                    ? "Review & claim job"
+                    : "Not accepting claims"}
+              </button>
+            </article>
+          ))}
         </div>
-      </section>
-
-      {claimJob && (
-        <ClaimModal job={claimJob} onClose={() => setClaimJob(null)} />
-      )}
-    </>
+        {selected && (
+          <ClaimModal
+            job={selected}
+            onClose={() => {
+              const p = new URLSearchParams(window.location.search);
+              const pending = p.get("claimTx");
+              if (pending) setPendingClaim(pending as Hex);
+              const saved = p.get("intent");
+              if (saved) setRecoveredIntent(saved);
+              setSelected(null);
+              void load(id);
+            }}
+          />
+        )}
+      </div>
+    </section>
   );
 }

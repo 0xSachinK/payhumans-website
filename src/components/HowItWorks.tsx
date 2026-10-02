@@ -1,135 +1,89 @@
-"use client";
-
+import Link from "next/link";
 import SectionReveal from "./SectionReveal";
+import LifecycleDiagram from "./diagrams/LifecycleDiagram";
+import { EscrowIcon, HumanIcon, WalletIcon } from "./diagrams/Icons";
+import { LINKS } from "@/lib/constants";
 
-const flows: {
-  label: string;
-  tag: string;
+const phases: {
+  Icon: typeof WalletIcon;
+  n: string;
+  title: string;
+  chain: string;
   color: string;
-  highlight?: boolean;
-  steps: { actor: string; action: string }[];
+  body: string;
+  planned?: string;
 }[] = [
   {
-    label: "Agent buys USDC",
-    tag: "ON-RAMP",
-    color: "var(--accent)",
-    steps: [
-      { actor: "Agent", action: "Finds LP with fiat access" },
-      { actor: "Human", action: "Sends fiat payment" },
-      { actor: "Protocol", action: "Verifies via ZK proof" },
-      { actor: "Escrow", action: "Releases USDC to agent" },
-    ],
+    Icon: WalletIcon,
+    n: "01",
+    title: "Fund",
+    chain: "Today: USDC on Base",
+    color: "#c084fc",
+    planned: "Planned: Solana USDC/SOL via Peer + Relay",
+    body: "The agent's Base wallet holds USDC and a little ETH for gas. Funding from Solana is planned and not available yet.",
   },
   {
-    label: "Agent provides liquidity",
-    tag: "LP",
-    color: "var(--green)",
-    highlight: true,
-    steps: [
-      { actor: "Agent", action: "Deposits USDC via CLI" },
-      { actor: "Agent", action: "Sets rates and platforms" },
-      { actor: "Taker", action: "Pays fiat, proves payment" },
-      { actor: "Agent", action: "Earns spread automatically" },
-    ],
+    Icon: EscrowIcon,
+    n: "02",
+    title: "Escrow",
+    chain: "Base",
+    color: "#60a5fa",
+    body: "The agent creates a Peer escrow deposit: USDC amount, recipient, platform, and a rate in fiat per USDC.",
   },
   {
-    label: "Agent sells USDC",
-    tag: "OFF-RAMP",
-    color: "var(--purple)",
-    steps: [
-      { actor: "Agent", action: "Deposits USDC in escrow" },
-      { actor: "Human", action: "Pays fiat to recipient" },
-      { actor: "Protocol", action: "Proof verifies payment" },
-      { actor: "Human", action: "Receives USDC from escrow" },
-    ],
-  },
-  {
-    label: "Human \u2194 Human",
-    tag: "P2P",
-    color: "var(--amber)",
-    steps: [
-      { actor: "Maker", action: "Deposits USDC, sets rates" },
-      { actor: "Taker", action: "Signals intent, pays fiat" },
-      { actor: "Protocol", action: "ZK proof of payment" },
-      { actor: "Settlement", action: "USDC released to taker" },
-    ],
+    Icon: HumanIcon,
+    n: "03",
+    title: "Claim",
+    chain: "Base + payment app",
+    color: "#4ade80",
+    body: "A human claims, pays the recipient in fiat, proves it, and receives the escrowed USDC on Base.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 md:py-32 px-6">
+    <section id="how-it-works" className="py-20 md:py-28 px-6 scroll-mt-16">
       <div className="max-w-6xl mx-auto">
-        <SectionReveal>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
-            Protocol
-          </p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
-            Four flows. One marketplace.
-          </h2>
-          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-20 text-base">
-            Trustless escrow + cryptographic proofs. Agents and humans
-            trade across one unified P2P network.
-          </p>
+        <SectionReveal className="max-w-2xl mb-10">
+          <p className="eyebrow mb-4">Lifecycle</p>
+          <h2 className="section-title">Fund. Escrow. Claim.</h2>
         </SectionReveal>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {flows.map((f, i) => (
-            <SectionReveal key={f.label} delay={i * 0.07}>
-              <div className={`frost p-7 h-full ${f.highlight ? "ring-1 ring-[var(--green)]/20" : ""}`}>
-                {f.highlight ? (
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium bg-[var(--green)]/10 text-[var(--green)] border border-[var(--green)]/20 mb-4">
-                    <span className="w-1 h-1 rounded-full bg-[var(--green)]" />
-                    Most Common Flow
-                  </div>
+        <div className="grid md:grid-cols-3 gap-4 mb-16">
+          {phases.map(({ Icon, n, title, chain, color, body, planned }, i) => (
+            <SectionReveal key={title} delay={i * 0.06}>
+              <div className="frost h-full p-6 relative overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-px" style={{ background: color }} />
+                <div className="flex items-center justify-between mb-5">
+                  <Icon size={20} style={{ color }} />
+                  <span className="font-mono text-[11px] text-[var(--muted)]">{n}</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{title}</h3>
+                <p className="font-mono text-[11px] mb-3" style={{ color }}>{chain}</p>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{body}</p>
+                {planned ? (
+                  <p className="mt-4 inline-flex rounded-md border border-dashed border-[#c084fc]/40 px-2.5 py-1 font-mono text-[11px] text-[#c084fc]">
+                    {planned}
+                  </p>
                 ) : null}
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-semibold text-lg">{f.label}</h3>
-                  <span
-                    className="text-[10px] uppercase tracking-[0.15em] font-mono px-2.5 py-1 rounded-full border"
-                    style={{
-                      color: f.color,
-                      borderColor: `color-mix(in srgb, ${f.color} 20%, transparent)`,
-                      background: `color-mix(in srgb, ${f.color} 5%, transparent)`,
-                    }}
-                  >
-                    {f.tag}
-                  </span>
-                </div>
-                <div className="space-y-0">
-                  {f.steps.map((s, j) => (
-                    <div key={j} className="flex items-start gap-4 relative">
-                      {j < f.steps.length - 1 ? (
-                        <div
-                          className="absolute left-[11px] top-6 w-px h-[calc(100%-8px)]"
-                          style={{ background: `color-mix(in srgb, ${f.color} 25%, transparent)` }}
-                        />
-                      ) : null}
-                      <div
-                        className="mt-1.5 w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0 border"
-                        style={{
-                          color: f.color,
-                          borderColor: `color-mix(in srgb, ${f.color} 30%, transparent)`,
-                          background: `color-mix(in srgb, ${f.color} 8%, transparent)`,
-                        }}
-                      >
-                        {j + 1}
-                      </div>
-                      <div className="pb-5">
-                        <span className="text-[10px] uppercase tracking-wider text-[var(--muted)] font-mono">
-                          {s.actor}
-                        </span>
-                        <p className="text-sm text-[var(--secondary)]">
-                          {s.action}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </SectionReveal>
           ))}
         </div>
+
+        <SectionReveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <h3 className="text-xl md:text-2xl font-semibold tracking-tight">Inside the claim, on Base</h3>
+          <p className="text-sm text-[var(--muted)] max-w-sm leading-relaxed">
+            Each row is a participant. Read left to right to see who acts and where money
+            moves.{" "}
+            <Link href={`${LINKS.docs}#lifecycle`} className="text-[var(--secondary)] underline underline-offset-4 decoration-white/20">
+              Full lifecycle
+            </Link>
+          </p>
+        </SectionReveal>
+        <SectionReveal>
+          <LifecycleDiagram />
+        </SectionReveal>
       </div>
     </section>
   );

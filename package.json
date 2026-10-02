@@ -6,17 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
+    "@privy-io/react-auth": "3.46.0",
+    "@privy-io/wagmi": "4.0.17",
     "@radix-ui/react-accordion": "^1.2.12",
-    "@rainbow-me/rainbowkit": "^2.2.10",
+    "@stripe/stripe-js": "1.54.2",
     "@tanstack/react-query": "^5.95.2",
+    "@zkp2p/providers": "7.9.2",
+    "@zkp2p/sdk": "0.14.4",
     "framer-motion": "^12.38.0",
-    "next": "16.2.1",
+    "next": "16.3.8",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "viem": "^2.47.6",
+    "viem": "2.56.0",
     "wagmi": "^2.19.5"
   },
   "devDependencies": {
@@ -25,8 +30,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.1",
+    "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "ws@>=8.0.0 <9": "8.22.0"
   }
 }

@@ -1,43 +1,48 @@
+import Link from "next/link";
 import { LINKS } from "@/lib/constants";
 
 const nav = [
-  { label: "Documentation", href: LINKS.docs },
-  { label: "GitHub", href: LINKS.github },
-  { label: "Twitter", href: LINKS.twitter },
-  { label: "Discord", href: LINKS.discord },
-  { label: "Peer App", href: LINKS.app },
+  { label: "Docs", href: LINKS.docs },
+  { label: "Agent quickstart", href: "/docs#quickstart" },
+  { label: "Earn", href: LINKS.earn },
 ];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/[0.04] py-16 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          <div>
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-7 h-7 rounded-md bg-[var(--accent)] flex items-center justify-center">
-                <span className="text-white font-mono text-xs font-bold">P</span>
-              </div>
-              <span className="font-semibold text-sm tracking-tight">
-                PayHumans<span className="text-[var(--accent)]">.ai</span>
-              </span>
-            </div>
-            <span className="text-xs text-[var(--muted)]">
-              Built by P2P Labs &middot; Powered by Peer Protocol
-            </span>
-          </div>
+    <footer className="border-t border-white/[0.05] py-14 px-6 mt-auto">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-3">
+          <span className="font-semibold text-sm tracking-tight">
+            PayHumans<span className="text-[var(--muted)]">.ai</span>
+          </span>
+          <p className="text-xs text-[var(--muted)] max-w-md leading-relaxed">
+            An independent project. Escrow, payment verification, and payouts use Peer
+            protocol contracts on Base. Solana funding is planned, not live. This site does
+            not custody funds.
+          </p>
+          <p className="text-xs text-[var(--muted)]">
+            Prepared for{" "}
+            <a
+              href={LINKS.buildLab}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--secondary)] underline underline-offset-4 decoration-white/20 hover:text-[var(--fg)]"
+            >
+              Chiang Mai Build Lab
+            </a>
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            {nav.map((n) => (
-              <a
-                key={n.label}
-                href={n.href}
-                className="text-xs text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-              >
-                {n.label}
-              </a>
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {nav.map((n) => (
+            <Link
+              key={n.label}
+              href={n.href}
+              className="text-xs text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
+            >
+              {n.label}
+            </Link>
+          ))}
         </div>
       </div>
     </footer>

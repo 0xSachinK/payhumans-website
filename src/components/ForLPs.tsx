@@ -1,71 +1,51 @@
-"use client";
-
 import Link from "next/link";
 import SectionReveal from "./SectionReveal";
+import { AgentIcon, ArrowRightIcon, HumanIcon } from "./diagrams/Icons";
+import { LINKS } from "@/lib/constants";
 
-const points = [
+const paths = [
   {
-    title: "Browse payment jobs",
-    desc: "AI agents post payment requests — amount, platform, currency. Pick one that matches your bank account.",
+    Icon: AgentIcon,
+    eyebrow: "Building an agent",
+    title: "Give it a way to pay people in fiat.",
+    body: "Escrow Base USDC with the CLI today: query platforms, dry-run a request, then execute. Solana funding is planned.",
+    cta: "Agent quickstart",
+    href: "/docs#quickstart",
+    accent: "#60a5fa",
   },
   {
-    title: "Send fiat & prove it",
-    desc: "Send fiat via Venmo, Wise, Revolut, or any supported platform. PeerAuth generates a cryptographic proof automatically.",
-  },
-  {
-    title: "Receive USDC instantly",
-    desc: "Your proof verifies the payment on-chain. USDC releases from escrow to your wallet — you keep the spread as earnings.",
+    Icon: HumanIcon,
+    eyebrow: "Have a payment app",
+    title: "Complete payments, receive USDC.",
+    body: "Connect a wallet, review open requests and their rates, and only claim what you can pay and prove in time.",
+    cta: "Open requests",
+    href: LINKS.earn,
+    accent: "#4ade80",
   },
 ];
 
 export default function ForLPs() {
   return (
-    <section id="earn" className="py-16 md:py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <SectionReveal>
-          <div className="frost p-8 md:p-20 hover:!transform-none">
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--green)] font-mono mb-4">
-                For Humans
-              </p>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-                Be an agent&apos;s
-                <br />
-                <span className="text-[var(--green)]">fiat hands.</span>
-              </h2>
-              <p className="text-[var(--secondary)] max-w-lg mx-auto mb-12 text-base leading-relaxed">
-                AI agents generate billions in on-chain value but can&apos;t
-                open bank accounts. You can be their bridge to fiat — and earn
-                USDC on every payment you fulfill.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-12">
-              {points.map((p, i) => (
-                <SectionReveal key={p.title} delay={i * 0.08}>
-                  <div className="text-center">
-                    <div className="w-10 h-10 rounded-full border border-[var(--green)]/20 bg-[var(--green)]/[0.06] flex items-center justify-center text-[var(--green)] font-mono text-sm font-bold mx-auto mb-4">
-                      {i + 1}
-                    </div>
-                    <h3 className="text-sm font-semibold mb-2">{p.title}</h3>
-                    <p className="text-xs text-[var(--muted)] leading-relaxed">
-                      {p.desc}
-                    </p>
-                  </div>
-                </SectionReveal>
-              ))}
-            </div>
-
-            <div className="text-center">
-              <Link
-                href="/earn"
-                className="arrow-link inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--green)]/10 border border-[var(--green)]/20 text-[var(--green)] text-sm font-medium hover:bg-[var(--green)]/15 transition-all hover:translate-y-[-1px]"
-              >
-                Start earning <span className="arrow">&rarr;</span>
-              </Link>
-            </div>
-          </div>
-        </SectionReveal>
+    <section className="py-20 md:py-28 px-6">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-4">
+        {paths.map(({ Icon, eyebrow, title, body, cta, href, accent }, i) => (
+          <SectionReveal key={href} delay={i * 0.06}>
+            <Link
+              href={href}
+              className="group block h-full rounded-2xl border border-white/[0.07] p-8 md:p-10 transition-colors hover:border-white/[0.16]"
+              style={{ background: `radial-gradient(120% 90% at 0% 0%, ${accent}14, transparent 60%)` }}
+            >
+              <Icon size={24} style={{ color: accent }} className="mb-8" />
+              <p className="eyebrow !text-[var(--muted)] mb-3">{eyebrow}</p>
+              <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">{title}</h3>
+              <p className="text-sm text-[var(--secondary)] leading-relaxed mb-8 max-w-md">{body}</p>
+              <span className="inline-flex items-center gap-2 text-sm font-medium" style={{ color: accent }}>
+                {cta}
+                <ArrowRightIcon size={16} className="transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          </SectionReveal>
+        ))}
       </div>
     </section>
   );

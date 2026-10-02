@@ -1,6 +1,8 @@
 import EarnPageClient from "@/components/earn/EarnPageClient";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Earn — PayHumans.ai",
   description:

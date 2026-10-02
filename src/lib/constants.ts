@@ -1,83 +1,71 @@
-export const STATS = {
-  volume: "$20.8M+",
-  platforms: "18+",
-  currencies: "35+",
-  commands: "88",
-} as const;
-
 export const LINKS = {
-  docs: "https://docs.peer.xyz",
-  github: "https://github.com/zkp2p",
-  twitter: "https://twitter.com/peerxyz",
-  discord: "https://discord.gg/peer",
-  app: "https://peer.xyz",
-  cliDocs: "https://docs.peer.xyz/cli",
+  docs: "/docs",
+  cliDocs: "/docs#quickstart",
+  earn: "/earn",
+  app: "/earn",
+  buildLab: "https://luma.com/superteam-5ffe",
 } as const;
 
-export const CAPABILITIES: {
-  name: string;
-  command: string;
-  status: "live" | "soon";
-}[] = [
-  { name: "Provide USDC liquidity", command: "peer deposit create", status: "live" },
-  { name: "Manage LP positions", command: "peer deposit set-rate", status: "live" },
-  { name: "Operate vaults (DRM)", command: "peer vault create", status: "live" },
-  { name: "Query market data", command: "peer market spreads", status: "live" },
-  { name: "Create checkout links", command: "peer checkout create", status: "live" },
-  { name: "Accept fiat payments", command: "Peer Pay SDK", status: "live" },
-  { name: "Whitelisted orderbooks", command: "peer intent-hook whitelist set", status: "live" },
-  { name: "Transfer USDC", command: "peer transfer", status: "live" },
-  { name: "Check balances", command: "peer balance", status: "live" },
-  { name: "Buy USDC with fiat", command: "Headless proof gen", status: "soon" },
+export const CLI = {
+  packageName: "payhumans-ai-cli",
+  bin: "payhumans",
+} as const;
+
+export const CLI_QUICKSTART = `# Requires USDC + a little ETH for gas in a Base wallet
+# Supported platforms and currencies (varies; always query)
+payhumans platforms
+
+# Preview a request (dry run by default, nothing is sent)
+payhumans deposit create --platform venmo \\
+  --recipient '<handle>' --amount 5 --currency USD --rate 0.98
+
+# Execute: same command plus --yes. The signer comes from
+# PAYHUMANS_PRIVATE_KEY or DEPLOYER_KEY in your env. Never paste keys.
+payhumans deposit create --platform venmo \\
+  --recipient '<handle>' --amount 5 --currency USD --rate 0.98 --yes`;
+
+export const CLI_COMMANDS: { command: string; desc: string }[] = [
+  { command: "payhumans platforms", desc: "List payment platforms and currencies currently supported." },
+  { command: "payhumans deposit create", desc: "Escrow Base USDC for a fiat payment. --amount is USDC, --rate is fiat per USDC." },
+  { command: "payhumans deposit show <id>", desc: "Check whether a request is open, claimed, or settled." },
+  { command: "payhumans deposit withdraw --id <id> --amount 5", desc: "Reclaim USDC that has not been paid out." },
 ];
 
 export const FAQ = [
   {
     q: "What is PayHumans.ai?",
-    a: "A marketplace where AI agents pay humans in fiat. Agents deposit USDC into escrow and specify a fiat recipient. Human executors send the fiat, prove it cryptographically, and earn the spread. Built on Peer protocol.",
+    a: "A way for an AI agent holding USDC on Base to get a fiat payment delivered to someone. The agent escrows USDC and names a recipient. A human claims the request, pays the recipient from their own payment account, proves the payment, and receives the escrowed USDC.",
   },
   {
-    q: "How do agents pay in fiat?",
-    a: "Agent deposits USDC into escrow via the Peer CLI or SDK. A human executor claims the job, sends fiat via Venmo/Wise/Revolut, and proves the payment with a TLS attestation. USDC releases automatically. No trust required.",
+    q: "Who spends what?",
+    a: "The human spends fiat (for example USD via Venmo) and receives USDC. The agent spends USDC and gets a fiat payment delivered. The agent's offered exchange rate determines how much USDC the human receives per unit of fiat sent; that difference is the human's reward.",
   },
   {
-    q: "How do I earn as a human executor?",
-    a: "Connect your wallet on the Earn page, browse open payment requests from AI agents, claim a job, send the fiat amount, and prove it with the PeerAuth extension. You earn the spread between the USDC escrowed and the fiat you send.",
+    q: "Which payment platforms work?",
+    a: "It depends on the platform and currency, and support can change. Run payhumans platforms to see what is currently available before creating a request. Do not assume a platform works because it appears elsewhere.",
   },
   {
-    q: "Do agents or executors need KYC?",
-    a: "No. Fully permissionless. Agents need a wallet and the Peer CLI. Human executors use their existing payment accounts. Verification is cryptographic (TLS attestation), not identity-based.",
+    q: "How is a payment verified?",
+    a: "The human uses a protocol payment-verification browser extension to produce a proof from their payment account. The escrow contract checks the proof against the request (recipient, amount, currency, timing) before releasing USDC. If the proof does not match, nothing is released.",
   },
   {
-    q: "What tokens are supported?",
-    a: "USDC on Base (chain 8453). Contracts accept any ERC-20 but the proof pipeline is optimized for USDC.",
+    q: "What if the human never pays?",
+    a: "Each claim has a time limit. If no valid proof arrives before it expires, the claim lapses and the USDC returns to the open request, where it can be claimed again or withdrawn by the agent.",
   },
   {
-    q: "What payment platforms?",
-    a: "18+ including Venmo, PayPal, CashApp, Wise, Revolut, Zelle, Monzo, Chime, N26, MercadoPago, Alipay — across 35+ currencies.",
+    q: "What risks does a human take?",
+    a: "Fiat sent from your account cannot be pulled back by this site. If you pay the wrong recipient, the wrong amount, or after your claim expires, the proof may fail and the escrow will not pay you. Only claim requests you can complete inside the window, on a platform you already use.",
   },
   {
-    q: "What is PeerAuth?",
-    a: "A browser extension that generates TLS attestation proofs. After you send a fiat payment, PeerAuth captures cryptographic proof directly from the payment platform — no screenshots or manual verification needed.",
+    q: "Can my Solana agent use this today?",
+    a: "Not directly yet. Today an agent needs USDC on Base to create a request. PayHumans is being built with Solana agents in mind: funding from Solana USDC or SOL through a future Peer and Relay integration is planned but not available. Even then, escrow, claims, proofs, and payouts would remain on Base; there is no Solana escrow program.",
   },
   {
-    q: "Works with Claude / GPT / OpenClaw?",
-    a: "Yes. peer mcp --full starts the MCP server. Add it to your agent's config and get 88 payment tools — quotes, deposits, intents, vaults, market data.",
+    q: "What does each chain need?",
+    a: "Today everything runs on Base: creating or withdrawing an escrow deposit needs USDC plus a little ETH for gas, and humans receive USDC on Base. Planned Solana funding would additionally need SOL for Solana network fees.",
   },
   {
-    q: "What about x402?",
-    a: "Our APIs are x402-enabled. Agents pay per request with USDC micropayments. PayHumans complements x402 — x402 for agent-to-agent crypto, PayHumans for the fiat bridge.",
-  },
-  {
-    q: "Is this like RentAHuman.ai?",
-    a: "No. RentAHuman rents human labor for arbitrary tasks. PayHumans rents human bank accounts for verified fiat payments. Our payments are cryptographically verified via ZK proofs — not trust-based. And we support real fiat settlement, not just crypto payouts.",
-  },
-  {
-    q: "How is this different from Payman AI?",
-    a: "Payman is payment infrastructure for developers — APIs and SDKs to move money. PayHumans is a marketplace where agents find humans to move fiat. Think of Payman as the plumbing and PayHumans as the marketplace built on top. Plus, we're permissionless — no KYC, no invite codes, no monthly fee.",
-  },
-  {
-    q: "What if the human doesn't pay?",
-    a: "The intent has a time limit. If the human doesn't prove payment within the window, the intent expires and funds stay in escrow. No risk to the depositor. The ZK proof is binary — either it verifies or it doesn't.",
+    q: "Who runs this?",
+    a: "PayHumans.ai is an independent project. Escrow and payment verification use Peer protocol contracts on Base; this site does not custody funds.",
   },
 ];
