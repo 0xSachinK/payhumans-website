@@ -150,23 +150,6 @@ body {
   transform: translateX(4px);
 }
 
-/* Platform pill hover */
-.pill-hover {
-  transition: border-color 0.2s, color 0.2s, transform 0.2s, background 0.2s;
-}
-.pill-hover:hover {
-  transform: translateY(-1px);
-}
-
-/* Capabilities row hover accent */
-.cap-row {
-  border-left: 2px solid transparent;
-  transition: border-color 0.2s, background 0.2s;
-}
-.cap-row:hover {
-  border-left-color: var(--accent);
-}
-
 /* FAQ item open state */
 [data-state="open"].faq-item {
   border-color: rgba(59,130,246,0.15);

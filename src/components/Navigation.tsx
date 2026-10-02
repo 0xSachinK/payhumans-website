@@ -8,7 +8,6 @@ import { LINKS } from "@/lib/constants";
 const links = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "For agents", href: "/#agents" },
-  { label: "Limits", href: "/#limits" },
   { label: "Docs", href: LINKS.docs },
   { label: "Earn", href: LINKS.earn },
 ];

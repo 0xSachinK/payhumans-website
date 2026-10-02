@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import * as Accordion from "@radix-ui/react-accordion";
 import SectionReveal from "./SectionReveal";
 import { FAQ as items } from "@/lib/constants";
@@ -15,8 +16,12 @@ export default function FAQ() {
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
             Frequently asked.
           </h2>
-          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-16 text-base">
-            Money direction, verification, expiry, and risk.
+          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-12 text-base">
+            More detail in the{" "}
+            <Link href="/docs" className="underline underline-offset-4 decoration-white/20 hover:text-[var(--fg)]">
+              docs
+            </Link>
+            .
           </p>
         </SectionReveal>
 
