@@ -38,7 +38,7 @@ Current escrow, claims, and payouts run on Base. Solana USDC/SOL funding through
 
 Production email login, embedded wallet creation, refresh persistence, logout, and real deposit reads have been verified. Unit tests cover CLI validation, dry-run isolation, secret redaction, transaction target checks, and authenticated contract-event recovery. A funded claim and complete fiat-payment proof flow still require live verification; do not treat a successful login or mocked test as proof of settlement.
 
-The CLI release is prepared but npm publication requires publisher authentication. See its README for the intended installed usage, or run the local entry point above.
+The CLI is published as [payhumans-ai-cli@0.1.0](https://www.npmjs.com/package/payhumans-ai-cli). Install with `npm install -g payhumans-ai-cli@0.1.0` on Node.js 22 or newer. See `packages/cli/README.md` for usage.
 
 ## Read-only live claim check
 

@@ -30,8 +30,9 @@ export default function PeerCLI() {
               ))}
             </ul>
             <p className="text-xs text-[var(--muted)] mt-5">
-              The CLI is in active development and not yet published; flags may change. Check{" "}
-              <code className="font-mono">{CLI.bin} --help</code>.
+              Available on npm as{" "}
+              <a href="https://www.npmjs.com/package/payhumans-ai-cli" className="underline">{CLI.packageName}</a>.
+              Requires Node.js 22 or newer. Check <code className="font-mono">{CLI.bin} --help</code> for all options.
             </p>
           </SectionReveal>
 

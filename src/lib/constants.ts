@@ -11,7 +11,10 @@ export const CLI = {
   bin: "payhumans",
 } as const;
 
-export const CLI_QUICKSTART = `# Requires USDC + a little ETH for gas in a Base wallet
+export const CLI_QUICKSTART = `# Install with Node.js 22 or newer
+npm install -g payhumans-ai-cli@0.1.0
+
+# Requires USDC + a little ETH for gas in a Base wallet
 # Supported platforms and currencies (varies; always query)
 payhumans platforms
 

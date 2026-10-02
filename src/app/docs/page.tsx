@@ -177,9 +177,10 @@ export default function DocsPage() {
               </p>
               <h3>1. Install</h3>
               <p>
-                Install instructions will be posted here once the package release is
-                verified. Until then, run <code>{CLI.bin} --help</code> from a local build.
+                Requires Node.js 22 or newer. Version 0.1.0 is available on{" "}
+                <a href="https://www.npmjs.com/package/payhumans-ai-cli">npm</a>.
               </p>
+              <div className="mt-3"><CodeBlock title="install">{"npm install -g payhumans-ai-cli@0.1.0\npayhumans --help"}</CodeBlock></div>
               <h3>2. Fund a Base wallet</h3>
               <p>
                 Hold USDC plus a little ETH for gas on Base in the wallet whose key the CLI will
