@@ -35,4 +35,13 @@ Verified on mainnet with the CLI and the live website:
 
 Not yet verified: a real fiat payment followed by a payment proof and USDC payout, and device passkey enrollment/login.
 
-USDC on Solana is the only funding route verified on mainnet so far. Other routes are listed, with their status, at https://payhumans.ai/docs#routes.
+## Evidence added October 4
+
+- Four real production deposits: native SOL → 5 USDC (6019), Ethereum ETH → 5 USDC (6020), Base ETH → 5 USDC (6021), and native Bitcoin from an external wallet → 10 USDC (6022). All settled in the existing Base escrow. The native Bitcoin route used the provider deposit-address flow, not wrapped BTC.
+- Independent Claude Opus 5.5 and GPT-6 Astra acceptance runs installed the published CLI and used separate low-value wallets. Owner-history and validation findings were fixed in 0.3.2, which includes 32 automated tests.
+- A controlled, unpaid 1-USDC claim on 6020 reserved that amount while the owner withdrew 4 available USDC. Withdrawing all 5 while 1 remained reserved was rejected. The known test claimant cancelled only its unpaid claim, then the owner recovered the remaining 1 USDC.
+- Separate withdrawals recovered 5 USDC from 6019 and 10 USDC from 6022. Returning the 5 USDC to the Solana source wallet delivered 4.763997 USDC after routing costs; a stricter minimum-receive preview rejected the quote.
+- All four deposits passed the current Peer mobile orderbook API in 20 eligibility checks, with the intended Revolut recipient and exact terms. Current mobile UI execution and push delivery were not observed.
+- Gross new deployer funding was conservatively accounted at USD 38.49, including funded test-wallet assets, within the USD 100 cap. This is not a claim that all funded assets were consumed as fees.
+
+Actual fiat payment, payment proof and USDC payout remain unverified in this QA. Deposit creation, a reserved claim and an unpaid cancellation are not fiat settlement. Route support and test status are listed separately at https://payhumans.ai/docs#routes. The public demo and founder-pitch URLs, private-repository judge access and the final submission window are separate submission requirements.

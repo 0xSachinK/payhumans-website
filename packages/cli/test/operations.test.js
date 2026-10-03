@@ -18,6 +18,14 @@ test('operation IDs are idempotent and reject changed amount or wallet',async()=
   assert.equal(fs.statSync(path.join(dir,'invoice_1.json')).mode & 0o777,0o600);
   assert.equal(fingerprint({a:1,b:2}),fingerprint({b:2,a:1}));
 }));
+test('missing operation returns a recoverable code without exposing the filesystem path',async()=>state(async dir=>{
+  assert.throws(()=>readOperation('missing'),error=>{
+    assert.equal(error.code,'OPERATION_NOT_FOUND');
+    assert.match(error.message,/operations list/);
+    assert.ok(!error.message.includes(dir));return true;
+  });
+  assert.equal(openOperation('missing','create',{amount:'5'},'owner').stage,'created');
+}));
 test('wallet lock prevents parallel operations and is released on error',async()=>state(async()=>{
   await withWalletLock('owner',async()=>{await assert.rejects(withWalletLock('owner',async()=>{}),/in use/);});
   await assert.rejects(withWalletLock('owner',async()=>{throw new Error('fixture');}),/fixture/);

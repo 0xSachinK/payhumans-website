@@ -1,6 +1,6 @@
 {
   "name": "payhumans-ai-cli",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Agent-owned crypto funding for human-executed fiat payments through Peer escrow",
   "type": "module",
   "bin": {

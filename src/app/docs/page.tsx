@@ -457,8 +457,9 @@ export default function DocsPage() {
                   key to own the order, and ETH on Base for gas. The provider&apos;s minimum
                   varies: a quote for a 5 USDC order was rejected and one for 10 USDC
                   succeeded. Your Bitcoin network fee is extra, and a failed route may
-                  refund less than you sent. Never send after the deadline, or twice. This
-                  route has not been tested with real funds.
+                  refund less than you sent. Never send after the deadline, or twice.
+                  On October 4, native BTC funded 10 USDC in mainnet deposit 6022; the
+                  unused funds were recovered on Base. Fiat payment remains unverified.
                 </li>
                 <li>
                   <strong>Wrapped bitcoin is not bitcoin.</strong> WBTC, cbBTC and similar
@@ -647,7 +648,7 @@ export default function DocsPage() {
               <h2>Status and partial fills</h2>
               <p>
                 <code>deposit show</code> needs no key. It reports where the order&apos;s
-                USDC is right now and lists every claim.
+                USDC is right now and lists every claim. Top-level balances are decimal USDC; nested intent amount fields use 6-decimal base units (1000000 means 1 USDC), labeled by <code>intentAmountUnits</code>. The <code>disputeProtection</code> field reports current platform policy and stake requirements; null means unknown or closed, not disabled.
               </p>
               <Code title="status">{CLI_COMMANDS.status}</Code>
               <div className="mt-6">
@@ -911,7 +912,7 @@ export default function DocsPage() {
                   Peer
                 </a>
                 &apos;s existing infrastructure, not new work by PayHumans. Routing is
-                provided by Relay, and by NEAR Intents for the experimental bitcoin route.
+                provided by Relay, and by NEAR Intents for external-wallet native bitcoin.
                 Privy provides the optional browser login on the claim page.
               </p>
               <p>

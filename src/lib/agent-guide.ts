@@ -36,15 +36,15 @@ const table = (head: string[], rows: string[][]) =>
 export const AGENT_RULES = [
   "Creating an order does not pay the recipient. It puts crypto in escrow and waits for a person. Only a claim in the FULFILLED state means a fiat payment was verified and USDC was released.",
   "Every command that spends is a preview until you pass `--yes`. Preview first and read `totalSourceInput`, `routes` and `fiatForFullDeposit` (amount times rate: the fiat the recipient gets if the whole order fills).",
-  "`--yes` requires `--operation-id` (your own unique ID for the payment) and `--max-source-spend`. Reuse the same operation ID on every retry; a new ID is a new payment.",
+  "Signed crypto writes require `--operation-id`. `deposit create --yes` also requires `--max-source-spend`; `return --yes` requires `--min-receive`. Recipient registration moves no crypto and needs no operation ID. Reuse the same operation ID on every retry; a new ID is a new payment.",
   `Retry protection depends on the local journal in \`${JOURNAL.path}\`. Keep that directory and back it up, and do not use the same wallet from another process or tool while an operation is in flight. Without the journal the CLI cannot tell what was already sent.`,
-  "The limits bound the route and execution gas, not every cost. L1 data fees, Solana account rent and your own Bitcoin transaction fee are extra. Each limit covers one order, so keep your own total budget.",
+  "The limits bound the route and execution gas, not every cost. L1 data fees, Solana account rent and your own Bitcoin transaction fee are extra. Each limit covers one order, so keep your own total budget. Gas caps are checked against prepared transactions during execution; a preview is not a full gas estimate, and earlier confirmed steps can remain spent if a later step is blocked.",
   "Keys come only from the environment: `PAYHUMANS_SOLANA_KEY` or `PAYHUMANS_EVM_KEY`, or their `_FILE` variants. Never put a key in a command argument, a prompt or a log. No account, API key or Privy login is needed.",
   `Whatever you fund with is converted to ${SETTLEMENT.asset} on ${SETTLEMENT.chain} before the deposit. The escrow is Peer's contract on ${SETTLEMENT.chain}. There is no escrow on Solana, Ethereum or Bitcoin.`,
-  "Only USDC on Solana has funded a real order on mainnet. Other routes are implemented but untested; a preview that succeeds is a quote, not a test. Native BTC is experimental and uses your own external Bitcoin wallet. Wrapped BTC is not accepted.",
+  "Funded mainnet tests cover Solana USDC/SOL, Ethereum ETH, Base ETH and external-wallet native BTC. Other implemented routes remain untested with funds. A successful quote alone is not a funded test. Wrapped BTC is not accepted.",
   "Recipient validation checks format, not ownership. Confirm the exact handle with the recipient. Fiat sent to a wrong handle cannot be recovered.",
   `Nobody is guaranteed to see or fill an order. ${PLATFORM_SETS.catalog} platforms can be named in an order, but only ${PLATFORM_SETS.inApp.length} can be filled in the Peer mobile app. Unclaimed funds can be withdrawn at any time. You cannot cancel another person's active claim, and should not try to: they may already have sent fiat.`,
-  "No fiat payment has been completed end to end through PayHumans yet. Start with small amounts.",
+  "Real fiat payment, proof and payout remain unverified in these PayHumans tests. Start with small amounts.",
 ];
 
 export const IDENTIFIERS = [
@@ -241,7 +241,7 @@ Status meanings:
 ${(Object.keys(ROUTE_STATUS) as (keyof typeof ROUTE_STATUS)[]).map((s) => `- ${ROUTE_STATUS[s].label}: ${ROUTE_STATUS[s].meaning}`).join("\n")}
 
 - A listed route still needs a live quote. Availability, minimum size and fees are decided when you preview.
-- Native bitcoin works differently. The CLI holds no Bitcoin key. It returns a deposit address, an exact amount and a deadline from the provider (NEAR Intents); you send BTC once from your own wallet, then resume the operation. It needs \`--refund-address\`, an EVM key to own the order, and ETH on Base for gas. The provider's minimum varies: a quote for a 5 USDC order was rejected and one for 10 USDC succeeded. Your Bitcoin network fee is extra, and a failed route may refund less than you sent. Never send after the deadline or a second time. This route has not been tested with real funds.
+- Native bitcoin works differently. The CLI holds no Bitcoin key. It returns a deposit address, an exact amount and a deadline from the provider (NEAR Intents); you send BTC once from your own wallet, then resume the operation. It needs \`--refund-address\`, an EVM key to own the order, and ETH on Base for gas. The provider's minimum varies: a quote for a 5 USDC order was rejected and one for 10 USDC succeeded. Your Bitcoin network fee is extra, and a failed route may refund less than you sent. Never send after the deadline or a second time. Native BTC funded 10 USDC in mainnet deposit 6022 on October 4; the unused funds were recovered on Base. Fiat payment remains unverified.
 - Wrapped bitcoin (WBTC, cbBTC and similar) is a different asset and is not accepted.
 
 ## Preview and cost
@@ -302,7 +302,7 @@ ${table(["ID", "Comes from", "Use it to"], IDENTIFIERS.map((i) => [`\`${i.name}\
 
 ${code(CLI_COMMANDS.status)}
 
-\`deposit show\` needs no key. It reports where the order's USDC is and lists every claim under \`intents\`.
+\`deposit show\` needs no key. It reports where the order's USDC is and lists every claim under \`intents\`. Top-level balances are decimal USDC; nested intent amount fields use USDC base units (6 decimals, so 1000000 means 1 USDC). The response labels these fields in \`intentAmountUnits\`. \`disputeProtection\` reports current per-platform policy and stake requirements, or null when the setting is unknown or the deposit is closed. Do not interpret null as disabled.
 
 ${table(["Field", "Meaning"], BALANCES.map((b) => [`\`${b.key}\``, b.meaning]))}
 
@@ -311,6 +311,8 @@ funded = available + reserved + fulfilled + withdrawn.
 - A claim is not a payment. A claim in the \`SIGNALED\` state is a reservation. Only \`FULFILLED\` means the escrow released USDC against a verified fiat payment.
 - Fiat delivered so far is about \`fulfilled\` multiplied by your rate; each claim's fiat amount is rounded up to a cent. For proof of an individual payment, read that claim's receipt fields under \`intents\`.
 - \`available\` and \`reserved\` are read from the chain. \`funded\`, \`fulfilled\`, \`withdrawn\` and \`intents\` come from Peer's indexer and can trail by a short time. If \`indexed\` is false, the indexed fields are null rather than zero and only the chain values are present.
+- \`deposit list --owner <address>\` includes closed orders from the indexer for the current Base escrow. It is a historical view and may lag onchain liquidity.
+- On RPC throttling, back off 15–30 seconds. A private Base endpoint can be set with \`PAYHUMANS_ESCROW_RPC_URL\` or \`PAYHUMANS_RPC_8453\`; keep credentials in your secret environment. Resume the original operation ID after interrupted execution.
 - Polling once a minute is plenty. An order is finished when \`available\` and \`reserved\` are both zero.
 
 ## Expiry and cancellation
@@ -386,7 +388,7 @@ Not yet verified:
 
 ${VERIFICATION.unverified.map((v) => `- ${v}`).join("\n")}
 
-PayHumans.ai is an independent project. It began as a website prototype on March 27, 2026. The CLI, the live escrow integration and the current site were built from October 2, 2026 onward. The escrow contracts, payment verification, SDKs and mobile app are Peer's existing infrastructure, not new work by PayHumans. Routing is provided by Relay, and by NEAR Intents for the experimental bitcoin route.
+PayHumans.ai is an independent project. It began as a website prototype on March 27, 2026. The CLI, the live escrow integration and the current site were built from October 2, 2026 onward. The escrow contracts, payment verification, SDKs and mobile app are Peer's existing infrastructure, not new work by PayHumans. Routing is provided by Relay, and by NEAR Intents for the external-wallet native bitcoin route.
 `;
 }
 
@@ -405,7 +407,14 @@ export function agentGuide() {
       output: "JSON on stdout. Errors are JSON on stderr with a non-zero exit code.",
       previewByDefault: true,
       executeFlag: "--yes",
-      requiredWithExecute: ["--operation-id", "--max-source-spend"],
+      requiredWithExecute: {
+        "deposit create": ["--operation-id", "--max-source-spend"],
+        "deposit withdraw": ["--operation-id"],
+        "deposit open-claims": ["--operation-id"],
+        return: ["--operation-id", "--min-receive"],
+        "recipient register": [],
+        "operations resume": ["saved operation ID; original limits are reused"],
+      },
       commands: [
         { command: "platforms", purpose: "List payment platforms, currencies and recipient rules.", needsKey: false },
         { command: "routes [--live]", purpose: "List crypto sources the CLI can fund from.", needsKey: false },
@@ -413,13 +422,13 @@ export function agentGuide() {
         { command: "recipient validate --platform --recipient", purpose: "Check a recipient identifier.", needsKey: false },
         { command: "recipient register --platform --recipient [--yes]", purpose: "Register recipient details with Peer. Moves no crypto.", needsKey: false },
         { command: "recipient show --platform --hash <bytes32>", purpose: "Read back a registered recipient by its hash.", needsKey: false },
-        { command: "deposit create ...", purpose: "Preview an order; with --yes, fund and create it.", needsKey: true },
+        { command: "deposit create ...", purpose: "Preview an order; with --yes, fund and create it.", needsKey: "For live balances/quotes and execution; keyless preview shows terms only." },
         { command: "deposit show <deposit-id>", purpose: "Read balances and claims for an order.", needsKey: false },
-        { command: "deposit list [--owner <address>]", purpose: "List orders owned by an account.", needsKey: false },
-        { command: "deposit withdraw --id <deposit-id> [--amount]", purpose: "Take available USDC back to your Base account. Never cancels a claim.", needsKey: true },
-        { command: "deposit open-claims --id <deposit-id> --platform <name>", purpose: "Remove the dispute-protection stake requirement for one platform on an order. Other eligibility rules still apply.", needsKey: true },
+        { command: "deposit list [--owner <address>] [--source-chain] [--source-asset]", purpose: "List orders owned by an account. Without --owner the source wallet supplies the Base owner.", needsKey: "Only when --owner is omitted. Source defaults to Solana USDC; EVM wallets must select their source explicitly." },
+        { command: "deposit withdraw --id <deposit-id> [--amount]", purpose: "Take available USDC back to your Base account. Never cancels a claim.", needsKey: "Only with --yes; select the owning source wallet." },
+        { command: "deposit open-claims --id <deposit-id> --platform <name>", purpose: "Remove the dispute-protection stake requirement for one platform on an order. Other eligibility rules still apply.", needsKey: "Only with --yes." },
         { command: "return [--amount] --min-receive <usdc>", purpose: "Route USDC from your Base account back to the same Solana wallet.", needsKey: true },
-        { command: "operations list | show <id> | resume <id>", purpose: "Inspect and resume journaled runs.", needsKey: false },
+        { command: "operations list | show <id> | resume <id>", purpose: "Inspect and resume journaled runs.", needsKey: "Only for resume --yes; use the same original source key." },
       ],
       createFlags: CREATE_FLAGS.map((f) => ({ ...f, meaning: f.meaning.replace(/`/g, "") })),
       examples: CLI_COMMANDS,
@@ -479,6 +488,6 @@ export function agentGuide() {
       llmsFull: abs(LINKS.llmsFull),
       npm: LINKS.npm,
     },
-    attribution: "Independent project. Escrow, payment verification, SDKs and the mobile app are Peer's. Routing by Relay; NEAR Intents for the experimental bitcoin route.",
+    attribution: "Independent project. Escrow, payment verification, SDKs and the mobile app are Peer's. Routing by Relay; NEAR Intents for external-wallet native bitcoin.",
   };
 }

@@ -1,8 +1,8 @@
 import { Zkp2pClient, getContracts, getPaymentMethodsCatalog, apiValidatePayeeDetails, apiGetPayeeDetails } from '@zkp2p/sdk';
 import { createCashClient, deriveCashOrder, nearIntentsQuoteFromJson, nearIntentsQuoteToJson } from '@zkp2p/cash';
-import { erc20Abi, encodeFunctionData, formatUnits, parseEther, parseEventLogs } from 'viem';
+import { erc20Abi, encodeFunctionData, formatUnits, isAddress, parseEther, parseEventLogs } from 'viem';
 import { ESCROW_USDC, quoteSummary, relayClient } from './solana.js';
-import { decimal, validateCreate } from './core.js';
+import { decimal, validateCreate, InvalidArgumentError, errorOutput, GAS_PREVIEW_NOTE } from './core.js';
 import { fundingWallet, fundingCash, sourceRoute, sourceBalances, displayBalances, evmClients, limits, assertQuote, assertSpendBudget, bitcoinAddress, NATIVE } from './funding.js';
 import { openOperation, saveOperation, withWalletLock } from './operations.js';
 import { evmTransaction, executeRelayRoute } from './transactions.js';
@@ -26,7 +26,7 @@ export async function validateRecipient(platform, recipient) {
   return { platform, recipient, validFormat: true, identityVerified: false, note: 'Format validation does not verify that this is your intended recipient. Confirm the payment handle with the recipient.' };
 }
 export async function recipientDetails(platform, hash) {
-  if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) throw new Error('Recipient hash must be a bytes32 hex value.');
+  if (!/^0x[0-9a-fA-F]{64}$/.test(hash)) throw new InvalidArgumentError('Recipient hash must be a bytes32 hex value.');
   const response = await apiGetPayeeDetails({ processorName: platform, hashedOnchainId: hash }, 'https://api.zkp2p.xyz', 20000);
   if (!response.success) throw new Error(response.message);
   return response.responseObject;
@@ -38,7 +38,7 @@ function publicOptions(opts, route) {
   return Object.fromEntries(Object.entries({ ...opts, sourceChain: route.chain, sourceAsset: route.asset }).filter(([key,value]) => !['yes','operationId'].includes(key) && value !== undefined));
 }
 function requestedPlan(p, route) {
-  return { source: route, settlement: { chainId: 8453, asset: 'USDC', token: ESCROW_USDC }, platform: p.platform, recipient: p.recipient, amount: formatUnits(p.amount, 6), currency: p.currency, fiatPerUsdc: formatUnits(p.rate, 18), fiatForFullDeposit: formatUnits(p.amount * p.rate, 24), minimumClaim: formatUnits(p.min, 6), maximumClaim: formatUnits(p.max, 6), note: 'A funded deposit is a request, not a fiat payment. Humans select compatible orders in Peer mobile. Partial fills may send separate fiat payments.' };
+  return { source: route, settlement: { chainId: 8453, asset: 'USDC', token: ESCROW_USDC }, platform: p.platform, recipient: p.recipient, amount: formatUnits(p.amount, 6), currency: p.currency, fiatPerUsdc: formatUnits(p.rate, 18), fiatForFullDeposit: formatUnits(p.amount * p.rate, 24), minimumClaim: formatUnits(p.min, 6), maximumClaim: formatUnits(p.max, 6), gasWarning: GAS_PREVIEW_NOTE, note: 'A funded deposit is a request, not a fiat payment. Humans select compatible orders in Peer mobile. Partial fills may send separate fiat payments.' };
 }
 function routeFeeUnits(raw) {
   // Relay exposes gas separately; cap protocol + relayer fees, excluding source network gas (separately bounded).
@@ -57,7 +57,7 @@ function enforceRoutes(op, additional, caps) {
   if (fees > caps.routeFeeUsd) throw new Error('Route fees exceed --max-route-fee-usd.');
 }
 async function bitcoinRoute(wallet, cash, amount, opts, caps, dry) {
-  if (!bitcoinAddress(opts.refundAddress)) throw new Error('--refund-address must be your Bitcoin mainnet refund address for external BTC funding.');
+  if (!bitcoinAddress(opts.refundAddress)) throw new InvalidArgumentError('--refund-address must be your Bitcoin mainnet refund address for external BTC funding.');
   const capabilities = await cash.nearIntentsCapabilities();
   const asset = capabilities.assets.find(a => a.assetId === '1cs_v1:btc:native:coin') ?? capabilities.assets.find(a => a.assetId === 'nep141:btc.omft.near');
   if (!asset || asset.decimals !== 8 || asset.blockchain !== 'btc') throw new Error('Provider is not advertising canonical native Bitcoin.');
@@ -98,7 +98,7 @@ export async function createDeposit(opts) {
     if (bridgeAmount > 0n && !direct) routes.funding = route.chain === 'bitcoin' ? await bitcoinRoute(wallet, cash, bridgeAmount, opts, caps, true) : await newRelayRoute(wallet, cash, bridgeAmount);
     if (balances.gas < MIN_BASE_GAS && route.chainId !== 8453 && route.chain !== 'bitcoin') routes.gas = await newRelayRoute(wallet, cash, GAS_TOPUP, true);
     enforceRoutes({ routes }, null, caps);
-    if (direct && caps.sourceSpend !== null && p.amount > caps.sourceSpend) throw new Error('Deposit exceeds --max-source-spend.');
+    if (direct && caps.sourceSpend !== null && p.amount > caps.sourceSpend) throw new InvalidArgumentError('Deposit exceeds --max-source-spend.');
     return { ...preview, recipientValidation: recipient, routes: Object.fromEntries(Object.entries(routes).map(([k,v]) => [k,v.summary])), totalSourceInput: formatUnits(direct ? p.amount : Object.values(routes).reduce((s,r) => s + BigInt(r.input),0n), route.decimals), next: 'Review recipient identity, fiat rate, caps and fees. Repeat with --operation-id <unique-payment-id> --yes. Use that same ID for all retries.', gasRequirement: route.chain === 'bitcoin' ? 'External BTC flow requires at least 0.00002 ETH on Base before requesting a deposit address.' : null };
   }
   return withWalletLock(wallet.account.address, async () => {
@@ -164,8 +164,30 @@ export function normalizedOrder(id, escrow, onchain, indexed, indexerError = nul
   const reserved = onchain?.deposit.outstandingIntentAmount ?? order?.pendingAmount;
   const available = onchain?.availableLiquidity ?? (indexed ? BigInt(indexed.remainingDeposits ?? 0) : null);
   return { depositId: String(id), compositeDepositId, escrow, chainId: 8453, owner: onchain?.deposit.depositor ?? indexed?.depositor, available: available === null ? null : formatUnits(available,6), reserved: reserved === undefined ? null : formatUnits(reserved,6), funded: order ? formatUnits(order.totalAmount,6) : null, fulfilled: order ? formatUnits(order.filledAmount,6) : null, withdrawn: order ? formatUnits(order.returnedAmount,6) : null, state: order?.state ?? 'indexer-unavailable', intents: order?.fills ?? [], indexed: !!order, indexerError, liquiditySource: onchain ? 'chain' : 'indexer', onchain,
+    intentAmountUnits: { asset: 'USDC', decimals: 6, encoding: 'integer-base-units', fields: ['amount', 'releasedAmount', 'takerAmountNetFees'] },
     note: 'Historical totals and fill details use the indexer and may lag. SIGNALED is a claim, not a payment. FULFILLED indicates contract release; inspect fiatPaid/paymentId for verified payment evidence. No claim is automatically cancelled by this CLI.' };
 }
+
+export async function depositDisputeSettings(client, id, escrow, onchain, indexed) {
+  const methods = [...new Set((onchain?.paymentMethods ?? indexed?.paymentMethods ?? []).map(m => m.paymentMethod ?? m.paymentMethodHash).filter(Boolean))];
+  const catalog = Object.entries(getPaymentMethodsCatalog(8453, 'production'));
+  const empty = onchain?.availableLiquidity === 0n && onchain?.deposit?.outstandingIntentAmount === 0n;
+  const closed = !onchain || empty || ['CLOSED', 'WITHDRAWN', 'PRUNED'].includes(indexed?.status);
+  return Promise.all(methods.map(async paymentMethodHash => {
+    const platform = catalog.find(([, p]) => p.paymentMethodHash.toLowerCase() === paymentMethodHash.toLowerCase())?.[0] ?? null;
+    const unknown = { platform, paymentMethodHash, enabled: null, requiresStake: null, riskWindowSeconds: null, source: 'unknown' };
+    if (closed) return { ...unknown, note: 'No live policy setting is reported for a closed, empty or unavailable deposit.' };
+    try {
+      const [enabled, riskWindow] = await Promise.all([
+        client.isDisputeProtectionEnabled(escrow, BigInt(id), paymentMethodHash),
+        client.getRiskWindow(paymentMethodHash),
+      ]);
+      if (typeof enabled !== 'boolean') throw new Error('Dispute policy returned an invalid enabled setting.');
+      return { platform, paymentMethodHash, enabled, requiresStake: enabled && riskWindow > 0n, riskWindowSeconds: riskWindow.toString(), source: 'chain' };
+    } catch (error) { return { ...unknown, error: errorOutput(error).error }; }
+  }));
+}
+
 export async function orderStatus(id) {
   const c = sdkClient(), escrow = escrowAddress(c), compositeId = `${escrow.toLowerCase()}_${id}`;
   const [chainResult,indexerResult] = await Promise.allSettled([c.getDeposit(BigInt(id)), c.indexer.getDepositsByIdsWithRelations([compositeId], { includeIntents:true })]);
@@ -174,5 +196,29 @@ export async function orderStatus(id) {
   if (!onchain && !indexed) throw chainResult.reason ?? new Error('Deposit not found.');
   if (!onchain && !/Deposit not found/.test(chainResult.reason?.message ?? '')) throw chainResult.reason;
   const indexerError = indexerResult.status === 'rejected' ? indexerResult.reason.message : indexed ? null : 'Deposit is not indexed yet.';
-  return normalizedOrder(id,escrow,onchain,indexed,indexerError);
+  return { ...normalizedOrder(id,escrow,onchain,indexed,indexerError), disputeProtection: await depositDisputeSettings(c,id,escrow,onchain,indexed) };
+}
+
+// ProtocolViewer owner enumeration can omit V2 deposits even when individual
+// reads succeed. Query current-escrow history directly, including closed orders.
+export async function listDeposits(owner, { client = sdkClient(), pageSize = 100 } = {}) {
+  if (!isAddress(owner)) throw new InvalidArgumentError('Invalid deposit owner address.');
+  const escrow = escrowAddress(client), orders = new Map();
+  for (let offset = 0; ; offset += pageSize) {
+    const page = await client.indexer.getDepositsWithRelations(
+      { depositor: owner, chainId: 8453, escrowAddress: escrow },
+      { limit: pageSize, offset, orderBy: 'timestamp', orderDirection: 'asc' },
+      { includeIntents: true },
+    );
+    const previousSize = orders.size;
+    for (const indexed of page) {
+      if (indexed.depositor?.toLowerCase() !== owner.toLowerCase() || indexed.escrowAddress?.toLowerCase() !== escrow.toLowerCase() || Number(indexed.chainId) !== 8453 || !/^\d+$/.test(indexed.depositId)) {
+        throw new Error('Indexer owner history returned a deposit outside the requested owner or current Base escrow.');
+      }
+      const order = normalizedOrder(indexed.depositId, escrow, null, indexed);
+      orders.set(order.compositeDepositId, order);
+    }
+    if (page.length < pageSize) return [...orders.values()];
+    if (orders.size === previousSize) throw new Error('Indexer owner history pagination did not advance. Retry the read.');
+  }
 }

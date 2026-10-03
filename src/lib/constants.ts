@@ -104,21 +104,27 @@ export const FUNDING_ROUTES: {
   },
   {
     asset: "ETH",
-    chain: "Ethereum, Base, Arbitrum, Optimism",
+    chain: "Ethereum, Base",
+    status: "tested",
+    note: "Independent installed-CLI tests funded 5 USDC each: Ethereum deposit 6020 and Base deposit 6021 on October 4. This verifies funding, not fiat payment.",
+  },
+  {
+    asset: "ETH",
+    chain: "Arbitrum, Optimism",
     status: "listed",
     note: "Swapped to USDC on Base by the routing provider.",
   },
   {
     asset: "SOL",
     chain: "Solana",
-    status: "listed",
-    note: "Swapped to USDC on Base by the routing provider.",
+    status: "tested",
+    note: "Native SOL funded 5 USDC in mainnet deposit 6019 on October 4. The unused escrow was withdrawn to its Base owner.",
   },
   {
     asset: "BTC (native)",
     chain: "Bitcoin",
-    status: "listed",
-    note: "Experimental. You send BTC yourself from your own Bitcoin wallet to an address the CLI returns; the CLI never holds a Bitcoin key. The provider sets a minimum that varies, and your Bitcoin network fee is extra. Wrapped bitcoin (WBTC, cbBTC) is a different asset and is not accepted.",
+    status: "tested",
+    note: "An external native Bitcoin wallet funded 10 USDC in deposit 6022 through NEAR Intents on October 4; the unused escrow was withdrawn on Base. You send BTC yourself once. Provider minimums vary and Bitcoin network fees are extra. The CLI never holds a Bitcoin key; wrapped bitcoin is not accepted.",
   },
 ];
 
@@ -328,7 +334,9 @@ ${CLI.bin} deposit create --platform revolut --recipient '<revtag>' \\
   --amount 20 --currency USD --rate 0.98 --min 1 --max 5`,
 
   status: `${CLI.bin} deposit show <deposit-id>
-${CLI.bin} deposit list`,
+${CLI.bin} deposit list --owner '<Base-deposit-owner-address>'
+# Or derive the owner from your configured source wallet:
+${CLI.bin} deposit list --source-chain ethereum --source-asset ETH`,
 
   operations: `${CLI.bin} operations list
 ${CLI.bin} operations show invoice-1042
@@ -533,14 +541,17 @@ export const BALANCES: { key: string; name: string; meaning: string }[] = [
 export const VERIFICATION = {
   asOf: "October 4, 2026",
   verified: [
-    "An agent wallet funded Peer escrow from Solana USDC and opened deposit 5962 (5 USDC, Venmo, rate 0.99) in one CLI run, on mainnet.",
-    "A person claimed that deposit through the payhumans.ai web flow. The claim was mined, shown with its recipient, fiat amount and expiry, then cancelled.",
-    "The agent withdrew the unclaimed USDC with the CLI and it returned to the Solana wallet. Deposits 5968 and 5970 repeated create and withdraw.",
+    "Native SOL, Ethereum ETH and Base ETH each funded a 5 USDC Revolut order on mainnet: deposits 6019, 6020 and 6021. Independent Astra and Claude testers used the published CLI for the Ethereum and Base runs.",
+    "Native Bitcoin funded 10 USDC in deposit 6022 through an external Bitcoin wallet and NEAR Intents. Funding and creation completed; unused funds were recovered as Base USDC.",
+    "A controlled unpaid 1 USDC claim on deposit 6020 left 4 USDC available. The CLI rejected an over-withdrawal and recovered only those 4 USDC. After we cancelled our own unpaid claim, the remaining 1 USDC was recovered. No fiat was sent.",
+    "A 5 USDC withdrawal from deposit 6019 returned 4.763997 USDC to the original Solana wallet after routing costs; a stricter minimum-receive preview rejected the quote safely.",
+    "All four new orders matched the current Peer mobile orderbook APIs and recipient checks. Completed operation retries returned the same deposit instead of creating another.",
+    "Earlier Solana USDC tests covered deposits 5962, 5968 and 5970, browser claim recovery and returning unused funds to Solana.",
   ],
   unverified: [
-    "A real fiat payment followed by a payment proof and a USDC payout. No order has been paid end to end yet.",
+    "A real fiat payment followed by payment proof and a USDC payout has not been verified in these PayHumans tests.",
     "Taking a PayHumans order inside the Peer mobile app on a physical device, and delivery of its push alerts.",
-    "Any funding route other than USDC on Solana, including ETH, SOL and native bitcoin.",
+    "Arbitrum and Optimism ETH, EVM USDC source routes and direct Base USDC funding remain implemented but not funded-tested in this release.",
   ],
 } as const;
 
@@ -551,7 +562,7 @@ export const FAQ = [
   },
   {
     q: "Which crypto can fund an order?",
-    a: "USDC on Solana is the route tested on mainnet. The CLI also implements USDC and ETH on several EVM chains, SOL, and an experimental native bitcoin route; none of those has funded a real order yet. The preview gets a live quote and refuses a source it cannot route. Wrapped bitcoin is not accepted.",
+    a: "Mainnet funding tests cover Solana USDC and SOL, Ethereum and Base ETH, and native Bitcoin from an external wallet. Other implemented EVM routes are listed separately as untested. Every new order still needs a live quote. Wrapped bitcoin is not accepted.",
   },
   {
     q: "Where do the funds sit?",

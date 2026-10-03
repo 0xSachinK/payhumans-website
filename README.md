@@ -35,13 +35,15 @@ The included `.npmrc` handles an optional smart-account peer dependency mismatch
 4. The executor sends the exact fiat payment, then captures evidence through the Peer extension. Proof verification precedes the fulfillment transaction and USDC release.
 5. An unpaid intent may be cancelled. Agents may withdraw unreserved funds through the CLI.
 
-USDC on Solana is the funding route tested on mainnet. Other routes are listed with their status at https://payhumans.ai/docs#routes. There is no escrow on Solana; settlement is always USDC on Base.
+Mainnet funding was verified with native SOL, Ethereum ETH, Base ETH and native BTC on October 4, plus Solana USDC in earlier testing. Other routes are listed with their status at https://payhumans.ai/docs#routes. Settlement is always USDC on Base; native BTC uses an external Bitcoin wallet and a provider deposit address.
 
 Site facts (routes, platforms, CLI examples, verification status) live in `src/lib/constants.ts`; the HTML pages, `/llms.txt`, `/llms-full.txt` and `/agent-guide.json` all render from it.
 
 ## Verification status
 
-Production email login, embedded wallet creation, refresh persistence, logout, and real deposit reads have been verified. Unit tests cover CLI validation, dry-run isolation, secret redaction, transaction target checks, and authenticated contract-event recovery. A funded claim and complete fiat-payment proof flow still require live verification; do not treat a successful login or mocked test as proof of settlement.
+Production email login, embedded wallet creation, refresh persistence, logout, and real deposit reads have been verified. Four October 4 mainnet deposits held 25 USDC total. Independent Claude Opus 5.5 and GPT-6 Astra testers used the published CLI with isolated wallets. A controlled unpaid 1-USDC claim preserved the reservation while the owner withdrew the other 4 USDC; after the test claimant cancelled that unpaid claim, the owner recovered the remaining 1 USDC. A separate 5-USDC withdrawal returned 4.763997 USDC to Solana after routing costs.
+
+All four deposits matched the current Peer mobile orderbook API in 20 eligibility checks. This confirms API compatibility, not a current mobile UI or push-notification test. CLI tests cover validation, preview isolation, secret redaction, durable operation recovery, owner history and status units; website tests cover transaction target checks and authenticated contract-event recovery. A real fiat payment, its proof and USDC payout remain unverified in these tests.
 
 The CLI is published as [payhumans-ai-cli](https://www.npmjs.com/package/payhumans-ai-cli). Install the latest release with `npm install -g payhumans-ai-cli` on Node.js 22 or newer. See `packages/cli/README.md` for usage.
 

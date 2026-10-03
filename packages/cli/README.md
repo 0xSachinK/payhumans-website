@@ -5,7 +5,7 @@ Fund human-executed fiat payments from an agent-owned wallet. PayHumans routes s
 Requires Node.js 22+. No Privy account, hosted wallet or PayHumans API key is required.
 
 ```sh
-npm install -g payhumans-ai-cli@0.3.1
+npm install -g payhumans-ai-cli@0.3.2
 payhumans routes
 payhumans platforms
 payhumans deposit create --help
@@ -23,6 +23,8 @@ Agent guidance: https://payhumans.ai/llms.txt · Documentation: https://payhuman
 | Bitcoin mainnet | Native BTC | External Bitcoin wallet sends to a provider-issued address; resume after conversion |
 
 Base USDC uses the same-chain path. These are implemented routes, not a claim that every route has been tested with funds. `routes --live` discovers current provider capabilities; a fresh quote may reject a route or amount. Wrapped BTC is not native BTC. Arbitrary tokens and networks are rejected.
+
+Funded verification on 4 October 2026 used published CLI 0.3.1: Ethereum ETH → 5 USDC deposit 6020, Base ETH → 5 USDC deposit 6021, Solana SOL → 5 USDC deposit 6019, and external native BTC → 10 USDC deposit 6022. Principal recovery was confirmed for 6019, 6020 and 6022. Ethereum 6020 also exercised an unpaid 1 USDC reservation, available-only withdrawal, cancellation by that same test claimant, and recovery of the remainder. EVM USDC sources, Arbitrum/Optimism ETH and the other listed routes are implemented but were not funded in this verification. No actual fiat payment, accepted payment proof or payer payout was verified.
 
 Configure keys using your secret manager or an existing protected file. Never put a signing key in command arguments, chat, logs or the repository.
 
@@ -86,6 +88,8 @@ Example cap values illustrate the syntax; obtain a live quote and fit caps to yo
 
 The CLI reuses USDC already in the owning Base wallet. If needed, EVM/Solana routes buy Base ETH for deposit approvals and gas. Direct Base and external BTC flows require existing Base ETH (at least 0.00002 ETH preflight; actual gas can cost more). Approvals are exact-amount approvals, never unlimited allowances.
 
+Preview gas figures are caps, not a complete transaction gas estimate. Each prepared transaction is checked during execution before signing and can fail its cap. Earlier confirmed steps remain spent, so inspect and resume the same operation ID after a failure.
+
 By default, new requests disable dispute protection so claimants need no stake. The depositor accepts payment reversal risk. Use `--require-stake` to keep it enabled. An interrupted post-deposit setting change can be resumed without another deposit.
 
 ## Interrupted operation recovery
@@ -117,7 +121,7 @@ payhumans deposit create \
 payhumans operations resume btc-invoice-001 --yes
 ```
 
-The external route uses the Peer Cash SDK's NEAR Intents integration and canonical native Bitcoin. The provider minimum varies; a $5 quote was rejected and a $10 read-only quote succeeded during verification. A successful preview is not a funded BTC test.
+The external route uses the Peer Cash SDK's NEAR Intents integration and canonical native Bitcoin. The provider minimum varies, and a 5 USDC quote was rejected during verification. On 4 October 2026, published CLI 0.3.1 completed a real 11,881 satoshi payment plus a 987 satoshi Bitcoin network fee, conversion to 10 Base USDC, [Peer deposit 6022](https://basescan.org/tx/0xf8ffe34eeff4ca8be21b7462d48b4865264ba98120a0be7200af52d9a995646d), and [withdrawal of its 10 USDC principal](https://basescan.org/tx/0xc2cb18b36a5e6cc66a89df14f07e35d8d1525b7aae1328a737dd3477e51ba1ae). This verifies crypto funding and recovery, not a fiat payment. Fresh quotes and limits are still required for every operation.
 
 `--yes` first validates/registers the recipient, checks Base gas and saves a unique provider quote. It returns `awaiting-external-funding` with BTC amount, deposit address, any memo, deadline, refund address and ETA. The CLI does **not** send BTC. External Bitcoin transaction fees are additional and must stay in your total budget. Never send after the deadline or to an old quote. Resume polls the saved provider address and only creates the Peer deposit after the provider reports the expected route successful and the Base USDC is present. Never send a second BTC payment on a pending, incomplete or expired quote. Failed routes may refund less than sent because of provider/network fees; inspect `operations show` and the refund address. Bitcoin confirmations may take substantially longer than EVM/Solana routing.
 
@@ -133,6 +137,10 @@ payhumans deposit withdraw --id 123 --source-chain ethereum --source-asset ETH \
 ```
 
 `show` exposes funded, available, reserved, fulfilled and withdrawn USDC amounts. `intents` includes individual intent hashes, amounts, status, expiry and available verified payment receipt fields. Deposit ID is the on-chain numeric identifier; composite ID is `escrowAddress_depositId`; each individual human claim has an `intentHash`. The owning wallet is not the fiat recipient. On-chain liquidity and indexed history can update at different times; source/freshness is reported.
+
+`intentAmountUnits` identifies raw intent `amount`, `releasedAmount` and `takerAmountNetFees` as integer USDC base units with six decimals (1,000,000 = 1 USDC). The top-level balance totals are already decimal USDC. `show.disputeProtection` reports each platform's live policy opt-in, risk window and resulting stake requirement. Closed deposits or failed policy reads return null settings with an explanation. Other app/admission requirements can still apply.
+
+`list --owner` is a keyless read of the owner's indexed history in the current Base escrow, including withdrawn/closed orders. It returns the same normalized amounts with `liquiditySource: "indexer"`; use `show` for live on-chain liquidity. Without `--owner`, the source wallet determines the owner. The default source is Solana; choose `--source-chain ethereum` (or another supported EVM chain) to use your configured EVM key. Indexer failures are reported as errors, not an empty history.
 
 `SIGNALED` is a reservation, not proof of fiat payment. `FULFILLED` indicates contract release; inspect payment receipt fields for evidence. Indexer failures return unknown historical fields rather than invented zeroes. Withdrawn/closed deposits can remain readable through indexed history.
 
@@ -153,6 +161,6 @@ The primary human path is **Peer mobile → P2P tab → USD → Revolut** for a 
 
 ## Agent output contract
 
-Success is JSON on stdout. Errors are JSON on stderr with `error.code` and `error.message`, nonzero exit status, and remediation where available. Help/version output is plain text. `RECIPIENT_REGISTRATION_REQUIRED` directs the recipient to Peer verification. `REQUEST_FAILED` preserves the actionable provider error when available. No interactive prompts occur. Keep a separate task-wide spending ledger; per-operation caps do not authorize repeated payments or a larger overall budget.
+Success is JSON on stdout. Errors are JSON on stderr with `error.code` and `error.message`, nonzero exit status, and remediation where available. Help/version output is plain text. `INVALID_ARGUMENT` identifies local argument validation, such as a zero/malformed amount or invalid deposit ID. `OPERATION_NOT_FOUND` directs you to the operation list and original state directory without exposing a filesystem path. `RECIPIENT_REGISTRATION_REQUIRED` directs the recipient to Peer verification. Provider/RPC errors retain their codes when supplied, otherwise `REQUEST_FAILED` preserves their actionable message. Throttling errors include backoff and RPC-override guidance; inspect and resume the same operation after a write attempt. No interactive prompts occur. Keep a separate task-wide spending ledger; per-operation caps do not authorize repeated payments or a larger overall budget.
 
 PayHumans is an independent product built with Peer contracts, the Peer SDK, Peer Cash SDK, Relay and NEAR Intents. Their public technical identifiers and attribution remain intact.

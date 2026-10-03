@@ -2,16 +2,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { createHash, randomUUID } from 'node:crypto';
-import { json } from './core.js';
+import { json, InvalidArgumentError } from './core.js';
 
 export function operationDirectory() { return process.env.PAYHUMANS_STATE_DIR || path.join(os.homedir(), '.payhumans', 'operations'); }
 export function validOperationId(id) {
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(id ?? '')) throw new Error('--operation-id must be 1–80 letters, digits, underscores or hyphens. Reuse the same ID to safely resume.');
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(id ?? '')) throw new InvalidArgumentError('--operation-id must be 1–80 letters, digits, underscores or hyphens. Reuse the same ID to safely resume.');
   return id;
 }
 function canonical(value) { return Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value; }
 export function fingerprint(value) { return createHash('sha256').update(json(canonical(value))).digest('hex'); }
-export function readOperation(id) { return JSON.parse(fs.readFileSync(path.join(operationDirectory(), `${validOperationId(id)}.json`), 'utf8')); }
+export function readOperation(id) {
+  validOperationId(id);
+  try { return JSON.parse(fs.readFileSync(path.join(operationDirectory(), `${id}.json`), 'utf8')); }
+  catch (error) {
+    if (error.code === 'ENOENT') throw Object.assign(new Error(`Operation ${id} was not found. Run payhumans operations list and confirm PAYHUMANS_STATE_DIR uses the original operation journal.`), { code: 'OPERATION_NOT_FOUND' });
+    throw error;
+  }
+}
 export function listOperations() {
   if (!fs.existsSync(operationDirectory())) return [];
   return fs.readdirSync(operationDirectory()).filter(f => f.endsWith('.json')).map(f => JSON.parse(fs.readFileSync(path.join(operationDirectory(), f), 'utf8')));
@@ -29,7 +36,7 @@ export function saveOperation(op) {
 export function openOperation(id, kind, request, owner) {
   validOperationId(id);
   let op;
-  try { op = readOperation(id); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+  try { op = readOperation(id); } catch (e) { if (e.code !== 'OPERATION_NOT_FOUND') throw e; }
   const requestHash = fingerprint({ kind, request, owner });
   if (op && op.requestHash !== requestHash) throw new Error(`Operation ${id} already exists with different parameters or wallet. Resume it, or deliberately use a new ID for a new payment.`);
   if (!op) { op = { schemaVersion: 1, id, kind, owner, request, requestHash, stage: 'created', createdAt: new Date().toISOString(), transactions: {}, routes: {} }; saveOperation(op); }

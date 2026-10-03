@@ -6,7 +6,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { mainnet, base, arbitrum, optimism, polygon } from 'viem/chains';
 import { createCashClient } from '@zkp2p/cash';
 import { escrowAccount, loadSolanaKeypair, relayClient, solanaConnection, solanaBalances, SOLANA_CHAIN_ID, SOLANA_USDC, ESCROW_USDC } from './solana.js';
-import { decimal } from './core.js';
+import { decimal, InvalidArgumentError } from './core.js';
 
 export const NATIVE = '0x0000000000000000000000000000000000000000';
 const EVM_CHAINS = [mainnet, base, arbitrum, optimism, polygon];
@@ -20,7 +20,7 @@ export function sourceRoute(opts = {}) {
   const name = String(opts.sourceChain ?? 'solana').toLowerCase();
   const symbol = String(opts.sourceAsset ?? (name === 'bitcoin' ? 'BTC' : 'USDC')).toUpperCase();
   const route = ROUTES.find(r => (r.chain === name || String(r.chainId) === name) && r.asset === symbol);
-  if (!route) throw new Error(`Unsupported source ${name}/${symbol}. Run payhumans routes. Native BTC is distinct from wrapped BTC.`);
+  if (!route) throw new InvalidArgumentError(`Unsupported source ${name}/${symbol}. Run payhumans routes. Native BTC is distinct from wrapped BTC.`);
   return route;
 }
 export function evmKey({ required = true } = {}) {
@@ -68,9 +68,9 @@ export async function fundingCash(slippageBps = 50) {
 }
 export function limits(opts, route) {
   const sourceSpend = opts.maxSourceSpend ?? (route.asset === 'USDC' ? opts.maxSpend : undefined);
-  if (opts.yes && !sourceSpend) throw new Error('--max-source-spend is required with --yes (in source-asset units, includes route input and route fees). For USDC, --max-spend is a compatible alias.');
+  if (opts.yes && !sourceSpend) throw new InvalidArgumentError('--max-source-spend is required with --yes (in source-asset units, includes route input and route fees). For USDC, --max-spend is a compatible alias.');
   const slippageBps = Number(opts.slippageBps ?? 50);
-  if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > 100) throw new Error('--slippage-bps must be an integer between 0 and 100.');
+  if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > 100) throw new InvalidArgumentError('--slippage-bps must be an integer between 0 and 100.');
   return {
     sourceSpend: sourceSpend ? decimal(sourceSpend, 'max-source-spend', route.decimals) : null,
     sourceGas: decimal(opts.maxSourceGas ?? (route.chain === 'solana' ? '0.002' : '0.001'), 'max-source-gas', route.chain === 'solana' ? 9 : 18),
