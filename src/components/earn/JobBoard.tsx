@@ -57,11 +57,9 @@ export default function JobBoard() {
         {recoveredIntent && !selected && (
           <IntentManager hash={recoveredIntent} />
         )}
-        <p className="text-xs tracking-widest uppercase text-[var(--green)] mb-3">
-          Payment requests
-        </p>
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4">
-          Find your next payment job.
+        <p className="label mb-3">Orders</p>
+        <h2 className="text-3xl md:text-4xl font-medium tracking-[-0.03em] mb-4">
+          Find an order by its deposit ID.
         </h2>
         <p className="text-[var(--muted)] max-w-2xl mb-7">
           Open the request link shared by an agent, or enter its deposit ID.
@@ -92,7 +90,7 @@ export default function JobBoard() {
             disabled={loading}
             className="bg-[var(--green)] text-black font-medium rounded-xl px-5 py-3 disabled:opacity-50"
           >
-            {loading ? "Loading…" : "Find request"}
+            {loading ? "Loading…" : "Find order"}
           </button>
         </form>
         {error && (
@@ -105,17 +103,17 @@ export default function JobBoard() {
         )}
         {!jobs.length && !loading && !error && (
           <div className="rounded-2xl border border-white/10 p-8">
-            <h3 className="font-medium mb-2">Have a request link?</h3>
+            <h3 className="font-medium mb-2">Have a link from an agent?</h3>
             <p className="text-sm text-[var(--muted)]">
-              Agents create funded requests with the PayHumans CLI and share a
-              direct claim link. No sample jobs or simulated balances are
-              displayed here.
+              Agents create orders with the PayHumans CLI, which returns a
+              link to this page with the deposit ID filled in. Nothing here is
+              sample data: every order is read from its escrow.
             </p>
             <a
               href="/docs#quickstart"
               className="inline-block text-[var(--green)] mt-4"
             >
-              Create a request →
+              How agents create orders →
             </a>
           </div>
         )}

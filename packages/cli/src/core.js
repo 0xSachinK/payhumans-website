@@ -1,5 +1,6 @@
 import { getPaymentMethodsCatalog, getCurrencyCodeFromHash } from "@zkp2p/sdk";
 import { parseUnits } from "viem";
+import { createCashClient } from "@zkp2p/cash";
 
 export function decimal(value, name, precision = 6) {
   if (
@@ -13,19 +14,23 @@ export function decimal(value, name, precision = 6) {
   if (amount <= 0n) throw new Error(`${name} must be greater than zero.`);
   return amount;
 }
+export function recipientRegistrationUrl(platform) {
+  const name = String(platform ?? "").toLowerCase();
+  return name === "wise" || name === "paypal"
+    ? `https://app.peer.xyz/sell/${name}`
+    : "https://app.peer.xyz/sell?tab=advanced";
+}
 export function platforms() {
-  return Object.entries(getPaymentMethodsCatalog(8453, "production")).map(
-    ([platform, config]) => ({
-      platform,
-      currencies: (config.currencies ?? [])
-        .map((hash) => getCurrencyCodeFromHash(hash))
-        .filter(Boolean),
-      note:
-        platform === "wise"
-          ? "A verified recipient identity attestation may be required."
-          : "Recipient and platform validation applies at creation.",
-    }),
-  );
+  const cashPlatforms = createCashClient({ environment: "production" }).capabilities().platforms;
+  // The deployed Curator accepts narrower identifiers than generic SDK hints.
+  const recipientHints = { wise: "Wisetag (not an email address)", paypal: "PayPal.me username for a personal account", zelle: "Recipient email address" };
+  return Object.entries(getPaymentMethodsCatalog(8453, "production")).map(([platform, config]) => {
+    const capability = cashPlatforms.find(p => p.platform === platform || p.id === platform || p.processorName === platform);
+    const needsIdentity = capability?.requiresIdentityAttestation ?? ["paypal", "wise", "alipay"].includes(platform);
+    return { platform, currencies: (config.currencies ?? []).map(getCurrencyCodeFromHash).filter(Boolean), requiresIdentityAttestation: needsIdentity,
+      registrationUrl: recipientRegistrationUrl(platform), recipientHint: recipientHints[platform] ?? capability?.payeeHint ?? "See the platform recipient identifier format in Peer.",
+      note: needsIdentity ? `Reuse a registered recipient or complete recipient identity verification with the Peer browser extension at ${recipientRegistrationUrl(platform)}. A bare new handle may fail PAYEE_VERIFICATION_REQUIRED.` : "Register or reuse recipient details with payhumans recipient register. Registration validates format, not ownership; verify recipient identity separately." };
+  });
 }
 export function validateCreate(input) {
   const platform = input.platform.toLowerCase();
@@ -41,7 +46,7 @@ export function validateCreate(input) {
   if (!recipient || recipient.length > 256 || /[\x00-\x1f]/.test(recipient))
     throw new Error("A valid recipient payment identifier is required.");
   const amount = decimal(input.amount, "amount");
-  const min = decimal(input.min ?? input.amount, "min");
+  const min = decimal(input.min ?? (amount < 1_000_000n ? input.amount : "1"), "min");
   const max = decimal(input.max ?? input.amount, "max");
   if (min > max || max > amount)
     throw new Error("Require 0 < min <= max <= amount.");
@@ -64,10 +69,22 @@ export function json(value) {
 }
 export function safeError(error) {
   let message = error?.shortMessage || error?.message || "Request failed.";
+  let cause = error?.cause;
+  for (let i=0; cause && i<3; i++, cause=cause.cause) { if(cause.message && !message.includes(cause.message)) message += ` ${cause.message}`; }
   for (const secret of [
     process.env.PAYHUMANS_SOLANA_KEY,
+    process.env.PAYHUMANS_EVM_KEY,
+    process.env.PAYHUMANS_PRIVATE_KEY,
+    process.env.PAYHUMANS_NEAR_INTENTS_TOKEN,
     process.env.PAYHUMANS_RELAY_API_KEY,
+    ...Object.entries(process.env).filter(([name]) => name.startsWith("PAYHUMANS_") && name.includes("RPC")).map(([, value]) => value),
   ])
     if (secret) message = message.split(secret).join("[REDACTED]");
   return message.replace(/0x[a-fA-F0-9]{64}/g, "[hash]").slice(0, 1800);
+}
+
+export function errorOutput(error) {
+  const message = safeError(error);
+  const registration = /PAYEE_VERIFICATION_REQUIRED|identity attestation|verif.*required/i.test(message);
+  return { error: { code: registration ? "RECIPIENT_REGISTRATION_REQUIRED" : error.code || "REQUEST_FAILED", message, ...(registration ? { registrationUrl: recipientRegistrationUrl(), platformRegistrationUrls: { wise: recipientRegistrationUrl("wise"), paypal: recipientRegistrationUrl("paypal") }, next: "The recipient must finish verification at https://app.peer.xyz/sell?tab=advanced (Wise: /sell/wise; PayPal: /sell/paypal), then retry the same operation ID." } : {}) } };
 }

@@ -1,7 +1,7 @@
 {
   "name": "payhumans-ai-cli",
-  "version": "0.2.0",
-  "description": "A focused CLI for Solana AI agents to fund human-executed fiat payments with Solana USDC",
+  "version": "0.3.1",
+  "description": "Agent-owned crypto funding for human-executed fiat payments through Peer escrow",
   "type": "module",
   "bin": {
     "payhumans": "src/cli.js"
@@ -21,9 +21,10 @@
   "dependencies": {
     "@relayprotocol/relay-sdk": "7.0.3",
     "@relayprotocol/relay-svm-wallet-adapter": "21.0.4",
+    "@scure/base": "1.2.6",
     "@solana/web3.js": "1.98.4",
-    "@zkp2p/cash": "0.6.2",
-    "@zkp2p/sdk": "0.14.4",
+    "@zkp2p/cash": "0.7.0",
+    "@zkp2p/sdk": "0.14.5",
     "commander": "14.0.3",
     "viem": "2.55.19"
   },
@@ -38,6 +39,9 @@
     "agents",
     "payments",
     "usdc",
-    "solana"
+    "ethereum",
+    "solana",
+    "bitcoin",
+    "peer"
   ]
 }

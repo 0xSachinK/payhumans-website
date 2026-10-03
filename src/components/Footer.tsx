@@ -1,48 +1,86 @@
 import Link from "next/link";
+import { Mark, Wordmark } from "./brand/Logo";
 import { LINKS } from "@/lib/constants";
 
-const nav = [
-  { label: "Docs", href: LINKS.docs },
-  { label: "Agent quickstart", href: "/docs#quickstart" },
-  { label: "Earn", href: LINKS.earn },
+const columns = [
+  {
+    title: "Agents",
+    links: [
+      { label: "Quickstart", href: LINKS.cliDocs },
+      { label: "Docs", href: LINKS.docs },
+      { label: "llms.txt", href: LINKS.llms, plain: true },
+      { label: "agent-guide.json", href: LINKS.agentGuide, plain: true },
+      { label: "npm package", href: LINKS.npm, external: true },
+    ],
+  },
+  {
+    title: "Humans",
+    links: [
+      { label: "Fill orders", href: LINKS.earn },
+      { label: "Get the Peer app", href: LINKS.peerOnboard, external: true },
+      { label: "Claim page", href: LINKS.recover },
+    ],
+  },
+  {
+    title: "Built on",
+    links: [
+      { label: "Peer", href: LINKS.peer, external: true },
+      { label: "Peer docs", href: LINKS.peerDocs, external: true },
+    ],
+  },
 ];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/[0.05] py-14 px-6 mt-auto">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-3">
-          <span className="font-semibold text-sm tracking-tight">
-            PayHumans<span className="text-[var(--muted)]">.ai</span>
+    <footer className="mt-auto border-t border-rule bg-paper-2">
+      <div className="wrap py-14 md:py-16 grid gap-12 lg:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="max-w-[26rem]">
+          <span className="inline-flex items-center gap-2.5">
+            <Mark size={20} />
+            <Wordmark />
           </span>
-          <p className="text-xs text-[var(--muted)] max-w-md leading-relaxed">
-            An independent project for Solana agents. Escrow, payment verification, and
-            payouts use the Peer protocol. This site does not custody funds.
+          <p className="small mt-5">
+            PayHumans.ai is an independent project. Escrow, payment verification and
+            payouts run on Peer&apos;s contracts on Base. PayHumans never holds funds or keys.
           </p>
-          <p className="text-xs text-[var(--muted)]">
+          <p className="small mt-3">
             Prepared for{" "}
-            <a
-              href={LINKS.buildLab}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--secondary)] underline underline-offset-4 decoration-white/20 hover:text-[var(--fg)]"
-            >
+            <a href={LINKS.buildLab} target="_blank" rel="noopener noreferrer" className="link">
               Chiang Mai Build Lab
             </a>
+            .
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          {nav.map((n) => (
-            <Link
-              key={n.label}
-              href={n.href}
-              className="text-xs text-[var(--muted)] hover:text-[var(--fg)] transition-colors"
-            >
-              {n.label}
-            </Link>
+        <nav className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-10" aria-label="Footer">
+          {columns.map((c) => (
+            <div key={c.title}>
+              <p className="label mb-4">{c.title}</p>
+              <ul className="grid gap-2.5">
+                {c.links.map((l) => {
+                  const className = "text-[14.5px] text-ink-2 hover:text-pen transition-colors";
+                  return (
+                    <li key={l.label}>
+                      {"external" in l && l.external ? (
+                        <a href={l.href} target="_blank" rel="noopener noreferrer" className={className}>
+                          {l.label}
+                        </a>
+                      ) : "plain" in l && l.plain ? (
+                        <a href={l.href} className={`${className} font-mono text-[13px]`}>
+                          {l.label}
+                        </a>
+                      ) : (
+                        <Link href={l.href} className={className}>
+                          {l.label}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           ))}
-        </div>
+        </nav>
       </div>
     </footer>
   );

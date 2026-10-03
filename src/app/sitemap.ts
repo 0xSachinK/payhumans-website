@@ -1,26 +1,21 @@
 import type { MetadataRoute } from "next";
+import { SITE } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = "2026-10-02";
+  const lastModified = SITE.reviewed;
+  const page = (path: string, priority: number, changeFrequency: "weekly" | "monthly" = "weekly") => ({
+    url: `${SITE.url}${path}`,
+    lastModified,
+    changeFrequency,
+    priority,
+  });
 
   return [
-    {
-      url: "https://payhumans.ai",
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: "https://payhumans.ai/earn",
-      lastModified,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: "https://payhumans.ai/docs",
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
+    page("", 1),
+    page("/docs", 0.9),
+    page("/earn", 0.8),
+    page("/llms.txt", 0.6),
+    page("/llms-full.txt", 0.6),
+    page("/agent-guide.json", 0.5),
   ];
 }

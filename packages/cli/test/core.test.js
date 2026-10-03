@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {decimal,validateCreate,depositId,safeError} from '../src/core.js';
 const request={platform:'venmo',recipient:'example-recipient',amount:'5',currency:'USD',rate:'0.98'};
-test('keeps exact amounts and bounds the claim to the funded deposit',()=>{const r=validateCreate(request);assert.equal(r.amount,5_000_000n);assert.equal(r.rate,980000000000000000n);assert.equal(r.min,r.amount);assert.equal(r.max,r.amount);});
+test('keeps exact amounts and bounds the claim to the funded deposit',()=>{const r=validateCreate(request);assert.equal(r.amount,5_000_000n);assert.equal(r.rate,980000000000000000n);assert.equal(r.min,1_000_000n);assert.equal(r.max,r.amount);});
 test('rejects malformed, rounded, negative, zero and exponential amounts',()=>{for(const amount of ['0','-1','NaN','Infinity','1e4','1.0000001','0x10',' 5',''])assert.throws(()=>decimal(amount,'amount'));});
 test('rejects unsupported platform/currency and inconsistent claim ranges',()=>{for(const change of [{platform:'unknown'},{currency:'EUR'},{min:'6'},{max:'6'},{min:'4',max:'3'},{recipient:''},{maxSpend:'4.99'}])assert.throws(()=>validateCreate({...request,...change}));});
 test('accepts explicit USD cap equality and normalizes names',()=>{assert.equal(validateCreate({...request,platform:'VENMO',currency:'usd',maxSpend:'5'}).platform,'venmo');});

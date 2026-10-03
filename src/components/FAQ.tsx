@@ -1,63 +1,29 @@
-"use client";
-
 import Link from "next/link";
-import * as Accordion from "@radix-ui/react-accordion";
-import SectionReveal from "./SectionReveal";
-import { FAQ as items } from "@/lib/constants";
+import { FAQ as items, LINKS } from "@/lib/constants";
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-20 md:py-32 px-6">
-      <div className="max-w-3xl mx-auto">
-        <SectionReveal>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-mono mb-4 text-center">
-            Questions
-          </p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4">
-            Frequently asked.
-          </h2>
-          <p className="text-center text-[var(--muted)] max-w-lg mx-auto mb-12 text-base">
-            More detail in the{" "}
-            <Link href="/docs" className="underline underline-offset-4 decoration-white/20 hover:text-[var(--fg)]">
+    <section id="faq" className="band">
+      <div className="wrap grid lg:grid-cols-[minmax(0,0.42fr)_minmax(0,1fr)] gap-8 lg:gap-16">
+        <div>
+          <p className="label mb-4">Questions</p>
+          <h2 className="h2">Asked before funding.</h2>
+          <p className="body mt-4 text-[15px]">
+            The{" "}
+            <Link href={LINKS.docs} className="link">
               docs
-            </Link>
-            .
+            </Link>{" "}
+            go further on every one of these.
           </p>
-        </SectionReveal>
-
-        <SectionReveal>
-          <Accordion.Root type="single" collapsible className="space-y-2">
-            {items.map((item, i) => (
-              <Accordion.Item
-                key={i}
-                value={`item-${i}`}
-                className="faq-item frost overflow-hidden"
-              >
-                <Accordion.Trigger className="w-full flex items-center justify-between px-6 py-5 text-left text-sm font-medium hover:bg-white/[0.015] transition-colors group">
-                  <span>{item.q}</span>
-                  <svg
-                    className="chevron w-4 h-4 text-[var(--muted)] shrink-0 ml-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </Accordion.Trigger>
-                <Accordion.Content className="overflow-hidden data-[state=open]:animate-[slideDown_200ms_ease] data-[state=closed]:animate-[slideUp_200ms_ease]">
-                  <div className="px-6 pb-5 text-sm text-[var(--secondary)] leading-relaxed">
-                    {item.a}
-                  </div>
-                </Accordion.Content>
-              </Accordion.Item>
-            ))}
-          </Accordion.Root>
-        </SectionReveal>
+        </div>
+        <div className="faq">
+          {items.map((item) => (
+            <details key={item.q}>
+              <summary>{item.q}</summary>
+              <p className="answer">{item.a}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );

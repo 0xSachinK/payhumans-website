@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 6 32 20" width="320" height="200">
+  <title>PayHumans mark: a square (the agent) hands off to a circle (the person)</title>
+  <mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
+    <rect width="32" height="32" fill="#fff"/>
+    <circle cx="21.5" cy="16" r="10.9"/>
+  </mask>
+  <rect x="1" y="8" width="16" height="16" rx="2.2" fill="#111614" mask="url(#m)"/>
+  <circle cx="21.5" cy="16" r="9" fill="#2443d8"/>
+</svg>

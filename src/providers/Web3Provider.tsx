@@ -16,7 +16,7 @@ import { type ReactNode, useState, useEffect } from "react";
 export const PAYHUMANS_PRIVY_CONFIG = {
   appearance: {
     theme: "dark",
-    accentColor: "#7c3aed",
+    accentColor: "#5b76f0",
     landingHeader: "Your PayHumans wallet",
     loginMessage: "Sign in with a passkey or email to claim payment jobs.",
     showWalletLoginFirst: false,
