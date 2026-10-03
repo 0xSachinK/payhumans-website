@@ -146,7 +146,9 @@ export default function JobBoard() {
                 <div>
                   <dt className="text-[var(--muted)]">Claim range</dt>
                   <dd>
-                    {job.min}–{job.max} USDC
+                    {Number(job.max) > 0 && Number(job.max) >= Number(job.min)
+                      ? `${job.min}–${job.max} USDC`
+                      : "No claimable liquidity"}
                   </dd>
                 </div>
                 <div>
