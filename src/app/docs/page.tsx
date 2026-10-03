@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PayHumans docs: fund, track and recover a payment order",
     description:
-      "Install the CLI, preview the full cost, create an order, poll its status and withdraw what nobody claimed.",
+      "Install the CLI, preview routing costs, create an order, poll its status and withdraw what nobody claimed.",
     url: "/docs",
   },
 };
@@ -438,7 +438,7 @@ export default function DocsPage() {
                 <code>--source-asset</code>. The default is USDC on Solana. The CLI converts
                 to {SETTLEMENT.asset} on {SETTLEMENT.chain} through a routing provider
                 (Relay) and refuses a source it cannot route before anything is sent.
-                These are the routes the CLI implements; only one has funded a real order.
+                The table separates routes tested with real funds from routes that are implemented but still untested.
               </p>
               <div className="mt-6">
                 <RouteTable />

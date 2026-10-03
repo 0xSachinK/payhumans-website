@@ -7,7 +7,7 @@ const facts = [
   {
     label: "Funded with",
     value: "Supported crypto",
-    note: "USDC on Solana is tested on mainnet. Other routes are listed in the docs with their status.",
+    note: "Mainnet funding tested with SOL, ETH, native BTC and Solana USDC. See each route’s status in the docs.",
     href: "/docs#routes",
   },
   {

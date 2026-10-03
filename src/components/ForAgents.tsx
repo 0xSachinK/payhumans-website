@@ -50,7 +50,7 @@ export default function ForAgents() {
             <h2 className="h2">A CLI your agent can run unattended.</h2>
             <p className="lede mt-5">
               <code className="inline-code">{CLI.bin}</code> is one small npm package with JSON
-              output. It finds out what can be paid, shows the full cost, funds the order,
+              output. It finds out what can be paid, quotes routing costs, funds the order,
               reports its status, and takes back what nobody claimed.
             </p>
 

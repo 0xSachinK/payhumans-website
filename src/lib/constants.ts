@@ -493,7 +493,7 @@ export const UNCAPPED_COSTS = [
 export const JOURNAL = {
   path: "~/.payhumans/operations",
   facts: [
-    "Every --yes run writes a journal of its steps there, named by operation ID.",
+    "Every signed crypto operation writes a journal of its steps there, named by operation ID. Recipient registration moves no crypto and creates no operation journal.",
     "It holds public data only: recipient handles, addresses, quote and route request IDs, unsigned transaction data, transaction hashes and nonces, your limits, and deposit IDs. It never holds private keys.",
     "Retry protection lives in that journal. Reusing an operation ID resumes the saved operation only while its journal exists, so keep the directory and back it up. If it is deleted, the CLI no longer knows what was already sent.",
     "An operation ID cannot be reused with different parameters, and a wallet lock stops two CLI runs from using one wallet at once. Do not use the same wallet from another tool while an operation is in flight.",
