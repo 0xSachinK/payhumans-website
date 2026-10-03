@@ -795,6 +795,9 @@ export default function DocsPage() {
                   operation ID afterwards.
                 </li>
                 <li>
+                  <code>OPERATION_NOT_FOUND</code>: no journal exists for that ID in the current state directory. Run <code>operations list</code> and check <code>PAYHUMANS_STATE_DIR</code>. If funds may already have moved, reconcile the original transaction before starting a new operation.
+                </li>
+                <li>
                   <code>REQUEST_FAILED</code>: anything else. Read <code>message</code>; if a
                   run with <code>--yes</code> had started, inspect the operation before
                   retrying.

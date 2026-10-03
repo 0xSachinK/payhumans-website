@@ -76,6 +76,7 @@ export const IDENTIFIERS = [
 ];
 
 export const ERROR_CODES = [
+  { code: "OPERATION_NOT_FOUND", meaning: "No saved journal exists for that ID in the current state directory. Run operations list and confirm PAYHUMANS_STATE_DIR points to the original journal. If funds may already have moved, reconcile the original transaction before creating a new operation." },
   { code: "INVALID_ARGUMENT", meaning: "A flag is missing or malformed. Nothing was sent." },
   {
     code: "RECIPIENT_REGISTRATION_REQUIRED",
