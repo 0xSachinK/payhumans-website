@@ -2,8 +2,6 @@ import fs from "node:fs";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { createClient, MAINNET_RELAY_API } from "@relayprotocol/relay-sdk";
 import { configureDynamicChains } from "@relayprotocol/relay-sdk/chain-utils";
-import { adaptSolanaWallet } from "@relayprotocol/relay-svm-wallet-adapter";
-import { createCashClient } from "@zkp2p/cash";
 import { concat, keccak256, nonceManager, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -11,7 +9,6 @@ export const SOLANA_CHAIN_ID = 792703809;
 export const SOLANA_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const ESCROW_CHAIN_ID = 8453;
 export const ESCROW_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-const NATIVE = "0x0000000000000000000000000000000000000000";
 const ESCROW_ACCOUNT_DOMAIN = "payhumans.ai/escrow-account/v1";
 const TERMINAL = new Set(["success", "failure", "refund"]);
 
@@ -56,9 +53,11 @@ export function loadSolanaKeypair({ required = true } = {}) {
   }
   raw = raw.trim();
   let bytes;
-  if (raw.startsWith("[")) bytes = Uint8Array.from(JSON.parse(raw));
-  else if (raw.startsWith("{")) bytes = Uint8Array.from(JSON.parse(raw).secretKey ?? []);
-  else bytes = base58Decode(raw);
+  try {
+    if (raw.startsWith("[")) bytes = Uint8Array.from(JSON.parse(raw));
+    else if (raw.startsWith("{")) bytes = Uint8Array.from(JSON.parse(raw).secretKey ?? []);
+    else bytes = base58Decode(raw);
+  } catch { throw new Error("Solana signing key has an invalid base58/JSON format."); }
   if (bytes.length === 64) return Keypair.fromSecretKey(bytes);
   if (bytes.length === 32) return Keypair.fromSeed(bytes);
   throw new Error("Solana key must be a 64-byte secret key or a 32-byte seed.");
@@ -95,56 +94,6 @@ export async function relayClient() {
   return relay;
 }
 
-export async function cashClient() {
-  return createCashClient({ environment: "production", relay: { client: await relayClient() } });
-}
-
-// Peer Cash quote: Solana USDC in, an exact amount of escrow-ready USDC out at the agent's escrow account.
-export async function quoteSolanaUsdcToEscrow(cash, keypair, recipient, amount) {
-  return cash.quoteSource({
-    user: keypair.publicKey.toBase58(),
-    recipient,
-    amount,
-    source: { chainId: SOLANA_CHAIN_ID, currency: SOLANA_USDC },
-    tradeType: "EXACT_OUTPUT",
-  });
-}
-
-// Network-fee top-up for the escrow account, paid in Solana USDC.
-export async function quoteEscrowGas(keypair, recipient, wei) {
-  const client = await relayClient();
-  return client.actions.getQuote(
-    {
-      chainId: SOLANA_CHAIN_ID,
-      currency: SOLANA_USDC,
-      toChainId: ESCROW_CHAIN_ID,
-      toCurrency: NATIVE,
-      user: keypair.publicKey.toBase58(),
-      recipient,
-      amount: wei.toString(),
-      tradeType: "EXACT_OUTPUT",
-    },
-    false,
-  );
-}
-
-export async function quoteEscrowToSolana(sender, solanaRecipient, amount) {
-  const client = await relayClient();
-  return client.actions.getQuote(
-    {
-      chainId: ESCROW_CHAIN_ID,
-      currency: ESCROW_USDC,
-      toChainId: SOLANA_CHAIN_ID,
-      toCurrency: SOLANA_USDC,
-      user: sender,
-      recipient: solanaRecipient,
-      amount: amount.toString(),
-      tradeType: "EXACT_INPUT",
-    },
-    false,
-  );
-}
-
 export function quoteSummary(raw) {
   const d = raw?.details ?? {};
   return {
@@ -156,34 +105,6 @@ export function quoteSummary(raw) {
       : null,
     etaSeconds: d.timeEstimate ?? null,
   };
-}
-
-export async function executeFromSolana(raw, keypair, connection, log) {
-  const client = await relayClient();
-  const signatures = [];
-  const wallet = adaptSolanaWallet(
-    keypair.publicKey.toBase58(),
-    SOLANA_CHAIN_ID,
-    connection,
-    async (transaction, options) => {
-      transaction.sign([keypair]);
-      const signature = await connection.sendRawTransaction(transaction.serialize(), {
-        maxRetries: 5,
-        ...(options ?? {}),
-      });
-      signatures.push(signature);
-      log?.({ stage: "solana-submitted", signature, explorer: `https://solscan.io/tx/${signature}` });
-      return { signature };
-    },
-  );
-  await client.actions.execute({ quote: raw, wallet, onProgress: () => {} });
-  return signatures;
-}
-
-export async function executeFromEscrow(raw, walletClient) {
-  const client = await relayClient();
-  const { data } = await client.actions.execute({ quote: raw, wallet: walletClient, onProgress: () => {} });
-  return data;
 }
 
 export async function waitForRelay(cash, requestId, { timeoutMs = 300_000 } = {}) {

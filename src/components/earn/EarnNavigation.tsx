@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import WalletButton from "./WalletButton";
-import Link from "next/link";
+import Logo from "@/components/brand/Logo";
 import { LINKS } from "@/lib/constants";
 
 const links = [
-  { label: "How it works", href: "/docs#humans" },
-  { label: "Jobs", href: "#jobs" },
-  { label: "For Agents", href: "/" },
+  { label: "Fill orders in the app", href: LINKS.earn },
+  { label: "Find an order", href: "#jobs" },
+  { label: "For agents", href: "/" },
 ];
 
 export default function EarnNavigation() {
@@ -26,21 +26,12 @@ export default function EarnNavigation() {
     <nav
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#050505]/80 backdrop-blur-xl border-b border-white/[0.04]"
+          ? "bg-[#0f1412]/85 backdrop-blur-xl border-b border-white/[0.08]"
           : ""
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-[var(--green)] flex items-center justify-center">
-            <span className="text-[#050505] font-mono text-xs font-bold">
-              P
-            </span>
-          </div>
-          <span className="font-semibold text-sm tracking-tight">
-            PayHumans<span className="text-[var(--green)]">.ai</span>
-          </span>
-        </Link>
+        <Logo />
 
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
@@ -81,7 +72,7 @@ export default function EarnNavigation() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden overflow-hidden bg-[#050505]/95 backdrop-blur-xl border-b border-white/[0.04]"
+            className="md:hidden overflow-hidden bg-[#0f1412]/95 backdrop-blur-xl border-b border-white/[0.08]"
           >
             <div className="px-6 py-4 flex flex-col gap-3">
               {links.map((l) => (

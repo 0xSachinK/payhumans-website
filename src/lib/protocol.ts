@@ -112,5 +112,7 @@ export function errorMessage(error: unknown) {
     e.shortMessage ||
     e.message ||
     "Unable to complete the request."
-  ).slice(0, 600);
+  )
+    .replace(/https?:\/\/[^\s"'<>]+/g, "[service endpoint]")
+    .slice(0, 600);
 }

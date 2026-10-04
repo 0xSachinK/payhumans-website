@@ -1,410 +1,136 @@
 #!/usr/bin/env node
-import { Command } from "commander";
-import { Zkp2pClient, setLogLevel, getContracts, getPaymentMethodsCatalog } from "@zkp2p/sdk";
-import {
-  createWalletClient,
-  http,
-  isAddress,
-  erc20Abi,
-  formatUnits,
-  formatEther,
-  parseEther,
-  parseEventLogs,
-} from "viem";
-import { base } from "viem/chains";
-import {
-  decimal,
-  platforms,
-  validateCreate,
-  depositId,
-  json,
-  safeError,
-} from "./core.js";
-import {
-  ESCROW_CHAIN_ID,
-  ESCROW_USDC,
-  cashClient,
-  escrowAccount,
-  executeFromEscrow,
-  executeFromSolana,
-  loadSolanaKeypair,
-  quoteEscrowGas,
-  quoteEscrowToSolana,
-  quoteSolanaUsdcToEscrow,
-  quoteSummary,
-  solanaBalances,
-  solanaConnection,
-  waitForRelay,
-} from "./solana.js";
-setLogLevel("error");
-const output = (value) => console.log(json(value));
-const log = (value) => console.error(json(value));
-// Network fees on the escrow account are bought with Solana USDC when the balance runs low.
-const MIN_ESCROW_GAS = parseEther("0.00002");
-const ESCROW_GAS_TOPUP = parseEther("0.00005");
-const MIN_SOL_LAMPORTS = 2_000_000n;
-
-function escrowRpcUrl() {
-  return process.env.PAYHUMANS_ESCROW_RPC_URL || "https://mainnet.base.org";
-}
-function client(account) {
-  const rpcUrl = escrowRpcUrl();
-  const walletClient = createWalletClient({
-    account: account ?? "0x0000000000000000000000000000000000000001",
-    chain: base,
-    transport: http(rpcUrl),
+import { Command } from 'commander';
+import { setLogLevel, getPaymentMethodsCatalog } from '@zkp2p/sdk';
+import { erc20Abi, formatUnits } from 'viem';
+import { readFileSync } from 'node:fs';
+import { decimal, platforms, depositId, json, errorOutput, recipientRegistrationUrl, InvalidArgumentError, GAS_PREVIEW_NOTE } from './core.js';
+import { ROUTES, sourceRoute, fundingWallet, sourceBalances, displayBalances, fundingCash, evmClients, limits } from './funding.js';
+import { createDeposit, sdkClient, baseBalances, escrowAddress, orderStatus, listDeposits, validateRecipient, recipientDetails } from './deposits.js';
+import { readOperation, listOperations, openOperation, saveOperation, withWalletLock } from './operations.js';
+import { evmTransaction, executeRelayRoute } from './transactions.js';
+import { relayClient, quoteSummary, ESCROW_USDC, SOLANA_CHAIN_ID, SOLANA_USDC } from './solana.js';
+setLogLevel('error');
+const output = value => process.stdout.write(`${json(value)}\n`);
+const version = JSON.parse(readFileSync(new URL('../package.json', import.meta.url))).version;
+const program = new Command().name('payhumans').description('Agent-owned crypto funding for human-executed fiat payments. Writes preview unless --yes is supplied.').version(version);
+program.configureOutput({ writeErr: str => process.stderr.write(`${json({ error: { code: 'INVALID_ARGUMENT', message: str.trim() } })}\n`) });
+program.exitOverride();
+function sourceOptions(command) { return command.option('--source-chain <chain>', 'ethereum, base, arbitrum, optimism, polygon, solana or bitcoin', 'solana').option('--source-asset <asset>', 'ETH, SOL, USDC or BTC (chain-dependent)', 'USDC'); }
+function writeOptions(command) { return command.option('--operation-id <id>', 'Unique ID for this payment/action; REQUIRED with --yes, reuse on retries').option('--max-base-gas <eth>', 'Aggregate Base execution-gas upper bound', '0.0001').option('--yes', 'Execute the reviewed action'); }
+function fundingOptions(command) { return command.option('--max-source-spend <amount>', 'Maximum source asset input including route fees; REQUIRED with --yes').option('--max-spend <usdc>', 'USDC deposit cap; also source spend alias for USDC sources').option('--max-source-gas <native>', 'Aggregate source execution-gas cap (default 0.002 SOL or 0.001 native EVM)').option('--max-route-fee-usd <usd>', 'Maximum route service fees in USD', '2').option('--slippage-bps <bps>', 'Route slippage tolerance, integer 0–100', '50'); }
+program.command('platforms').description('Discover production payment catalog and recipient requirements').action(() => output({ settlement: 'Base USDC', platforms: platforms() }));
+program.command('routes').description('Discover CLI-supported source assets (live quote still required)').option('--live', 'Check currently advertised provider sources').action(async opts => {
+  const result = { settlement: { chain: 'base', chainId: 8453, asset: 'USDC', address: ESCROW_USDC }, routes: ROUTES, note: 'Supported implementation is not evidence of funded testing. Availability, minimum amount and fees are checked by a fresh provider quote. BTC uses an external wallet and needs Base ETH for escrow gas. Wrapped BTC is not native BTC.' };
+  if (opts.live) { const cash = await fundingCash(); const [relay,near] = await Promise.all([cash.sourceCapabilities(),cash.nearIntentsCapabilities()]); result.providerSources = { relay, nearIntentsBitcoin: near.assets.filter(a => a.blockchain === 'btc' && ['nep141:btc.omft.near','1cs_v1:btc:native:coin'].includes(a.assetId)) }; }
+  output(result);
+});
+sourceOptions(program.command('wallet').alias('balances').description('Show source balance and the Base deposit-owning wallet')).action(async opts => {
+  const route = sourceRoute(opts), wallet = fundingWallet(route);
+  const [source, base] = await Promise.all([sourceBalances(wallet),baseBalances(wallet.account)]);
+  output({ source: { chain: route.chain, address: route.chain === 'bitcoin' ? 'external Bitcoin wallet' : wallet.address, ...displayBalances(source,route) }, escrowAccount: { address: wallet.account.address, chainId: 8453, usdc: formatUnits(base.usdc,6), eth: formatUnits(base.gas,18), keyOwnership: wallet.keypair ? 'Deterministically derived from the Solana key; keep that same key to recover deposits.' : 'Your EVM wallet owns deposits directly.' } });
+});
+const recipient = program.command('recipient').description('Validate, register and retrieve platform payment recipients');
+recipient.command('validate').requiredOption('--platform <name>').requiredOption('--recipient <id>').action(async opts => output(await validateRecipient(opts.platform.toLowerCase(),opts.recipient)));
+recipient.command('show').requiredOption('--platform <name>').requiredOption('--hash <bytes32>').action(async opts => output(await recipientDetails(opts.platform.toLowerCase(),opts.hash)));
+recipient.command('register').requiredOption('--platform <name>').requiredOption('--recipient <id>').option('--yes', 'Register recipient data with Peer (no crypto transaction)').action(async opts => {
+  const checked = await validateRecipient(opts.platform.toLowerCase(), opts.recipient);
+  if (!opts.yes) return output({ mode: 'preview', ...checked, registrationUrl: recipientRegistrationUrl(opts.platform), next: `Repeat with --yes to register. Verified platforms may first require the recipient to complete identity verification at ${recipientRegistrationUrl(opts.platform)}.` });
+  output(await sdkClient().registerPayeeDetails({ processorNames: [opts.platform.toLowerCase()], payeeData: [{ offchainId: opts.recipient }] }));
+});
+const operations = program.command('operations').description('Inspect and resume durable local operation journals');
+operations.command('list').action(() => output(listOperations().map(op => ({ operationId: op.id, kind: op.kind, stage: op.stage, owner: op.owner, depositId: op.depositId, updatedAt: op.updatedAt }))));
+operations.command('show').argument('<id>').action(id => output(readOperation(id)));
+operations.command('resume').argument('<id>').option('--yes', 'Resume signing only the saved operation and original limits').action(async (id, opts) => {
+  const op = readOperation(id);
+  if (!opts.yes) return output({ mode: 'preview', operationId:id, kind:op.kind, stage:op.stage, request:op.request, gasWarning:GAS_PREVIEW_NOTE, next: `payhumans operations resume ${id} --yes` });
+  const params = { ...op.request, operationId:id, yes:true };
+  if (op.kind === 'create') output(await createDeposit(params));
+  else if (op.kind === 'withdraw') output(await withdraw(params));
+  else if (op.kind === 'return') output(await returnFunds(params));
+  else if (op.kind === 'open-claims') output(await openClaims(params));
+  else throw new Error('Unknown operation kind.');
+});
+const deposits = program.command('deposit').description('Create requests, inspect partial fills, recover available funds');
+fundingOptions(writeOptions(sourceOptions(deposits.command('create').description('Preview funding and recipient; --yes registers, funds and creates once'))))
+  .requiredOption('--platform <name>').requiredOption('--recipient <id>').requiredOption('--amount <usdc>').requiredOption('--currency <code>').requiredOption('--rate <fiat-per-usdc>')
+  .option('--min <usdc>', 'Minimum partial claim, default min(1USDC,amount)').option('--max <usdc>', 'Maximum claim, default full amount').option('--require-stake', 'Keep dispute protection enabled; claimants need stake').option('--refund-address <btc-address>', 'Your mainnet BTC refund address; required for Bitcoin funding')
+  .action(async opts => output(await createDeposit(opts)));
+deposits.command('show').argument('<id>').description('Read chain liquidity plus indexed fills, verified receipts and historical totals').action(async id => output(await orderStatus(depositId(id))));
+sourceOptions(deposits.command('list').description('List indexed current-escrow owner history, including closed orders; use show for live liquidity')).option('--owner <address>', 'Deposit owner on Base; no signing key needed when supplied').action(async opts => {
+  const owner = opts.owner ?? fundingWallet(sourceRoute(opts), { required: false })?.account.address;
+  if (!owner) throw new InvalidArgumentError('No wallet configured for deposit list. The default --source-chain is solana. Pass --owner <Base EVM address> for a keyless read, or explicitly choose --source-chain and configure that wallet key. For Solana, set PAYHUMANS_SOLANA_KEY_FILE.');
+  output(await listDeposits(owner));
+});
+async function withdraw(opts) {
+  let previous;
+  if (opts.yes && opts.operationId) { try { previous = readOperation(opts.operationId); } catch(e) { if(e.code !== "OPERATION_NOT_FOUND") throw e; } }
+  if(previous?.stage === "complete") return previous.result;
+  const id = depositId(opts.id), c = sdkClient();
+  const d = previous?.transactions?.withdraw ? { deposit: { depositor: previous.owner }, availableLiquidity: BigInt(previous.amount) } : await c.getDeposit(id);
+  const available = d.availableLiquidity;
+  const amount = previous?.amount ? BigInt(previous.amount) : opts.amount ? decimal(opts.amount,'amount') : available;
+  if (!previous?.transactions?.withdraw && (amount <= 0n || amount > available)) throw new Error(`Only ${formatUnits(available,6)} USDC is available. Reserved claims cannot be withdrawn.`);
+  const preview = { depositId: id.toString(), amount: formatUnits(amount,6), available: formatUnits(available,6), to: d.deposit.depositor, asset: 'Base USDC', note: 'Withdraws available liquidity only. Does not cancel active human claims. Funds stay in your own Base wallet; use return to move to Solana.' };
+  if (!opts.yes) return { mode:'preview', ...preview, gasWarning:GAS_PREVIEW_NOTE };
+  const route = sourceRoute(opts), wallet = fundingWallet(route), base = evmClients(8453,wallet.account), signed = sdkClient(wallet.account);
+  if (d.deposit.depositor.toLowerCase() !== wallet.account.address.toLowerCase()) throw new Error('Your wallet does not own this deposit.');
+  return withWalletLock(wallet.account.address,async () => {
+    const { yes, operationId, ...request } = opts;
+    const op = openOperation(operationId,'withdraw',request,wallet.account.address);
+    if (op.stage === 'complete') return op.result;
+    if (!op.prepared) { const tx = await signed.removeFunds.prepare({ depositId:id, amount }); op.prepared = { ...tx, value: String(tx.value ?? 0) }; op.amount = amount.toString(); saveOperation(op); }
+    const result = await evmTransaction(op,'withdraw',base,wallet.account,{ ...op.prepared,value:BigInt(op.prepared.value) },decimal(opts.maxBaseGas ?? '0.0001','max-base-gas',18));
+    op.stage='complete'; op.result={ operationId, ...preview, amount:formatUnits(BigInt(op.amount),6), ...result }; saveOperation(op); return op.result;
   });
-  return new Zkp2pClient({
-    walletClient,
-    rpcUrl,
-    chainId: ESCROW_CHAIN_ID,
-    runtimeEnv: "production",
-    baseApiUrl: "https://api.zkp2p.xyz",
+}
+writeOptions(sourceOptions(deposits.command('withdraw').description('Withdraw available USDC to the deposit owner on Base; never cancel active claims'))).requiredOption('--id <id>').option('--amount <usdc>', 'Amount, default all available').option('--keep-in-escrow-account', 'Compatibility alias; withdrawals always remain in your Base wallet').action(async opts => output(await withdraw(opts)));
+async function openClaims(opts) {
+  const id = depositId(opts.id), method = getPaymentMethodsCatalog(8453,'production')[opts.platform.toLowerCase()]?.paymentMethodHash;
+  if (!method) throw new InvalidArgumentError('Unsupported platform.');
+  if (!opts.yes) return { mode:'preview',depositId:id,platform:opts.platform,gasWarning:GAS_PREVIEW_NOTE,note:'Disable dispute protection for this payment method. Human claimants need no stake; the depositor accepts payment reversal risk.' };
+  const wallet=fundingWallet(sourceRoute(opts)), c=sdkClient(wallet.account), base=evmClients(8453,wallet.account);
+  if ((await c.getDeposit(id)).deposit.depositor.toLowerCase()!==wallet.account.address.toLowerCase()) throw new Error('Your wallet does not own this deposit.');
+  return withWalletLock(wallet.account.address,async()=>{
+    const { yes,operationId,...request }=opts, op=openOperation(operationId,'open-claims',request,wallet.account.address);
+    if(op.stage==='complete') return op.result;
+    if(await c.isDisputeProtectionEnabled(escrowAddress(c),id,method)) {
+      const tx=await c.setDisputeProtectionEnabled.prepare({escrow:escrowAddress(c),depositId:id,paymentMethod:method,enabled:false});
+      await evmTransaction(op,'open-claims',base,wallet.account,tx,decimal(opts.maxBaseGas,'max-base-gas',18));
+    }
+    op.stage='complete';op.result={operationId,depositId:id.toString(),disputeProtection:'disabled'};saveOperation(op);return op.result;
   });
 }
-function signer() {
-  const keypair = loadSolanaKeypair();
-  const account = escrowAccount(keypair);
-  return { keypair, account, c: client(account), connection: solanaConnection() };
-}
-async function receipt(c, hash) {
-  const r = await c.publicClient.waitForTransactionReceipt({ hash });
-  if (r.status !== "success") throw new Error(`Transaction reverted: ${hash}`);
-  return { transactionHash: hash, blockNumber: r.blockNumber, gasUsed: r.gasUsed };
-}
-async function preflight(c) {
-  if ((await c.publicClient.getChainId()) !== ESCROW_CHAIN_ID)
-    throw new Error("Escrow RPC points at the wrong network.");
-  const account = c.walletClient.account.address;
-  const [latest, pending] = await Promise.all(
-    ["latest", "pending"].map((blockTag) =>
-      c.publicClient.getTransactionCount({ address: account, blockTag }),
-    ),
-  );
-  if (pending !== latest)
-    throw new Error("Escrow account has pending transactions. Wait before retrying.");
-}
-async function escrowBalances(c, address) {
-  const [usdc, gas] = await Promise.all([
-    c.publicClient.readContract({ address: ESCROW_USDC, abi: erc20Abi, functionName: "balanceOf", args: [address] }),
-    c.publicClient.getBalance({ address }),
-  ]);
-  return { usdc, gas };
-}
-// Read the USDC credited by a mined transaction from its logs; balance reads can lag the receipt.
-async function usdcReceived(c, hash, to) {
-  const r = await c.publicClient.getTransactionReceipt({ hash });
-  return parseEventLogs({ abi: erc20Abi, logs: r.logs, eventName: "Transfer", strict: false })
-    .filter((e) => e.address.toLowerCase() === ESCROW_USDC.toLowerCase() && e.args.to?.toLowerCase() === to.toLowerCase())
-    .reduce((sum, e) => sum + e.args.value, 0n);
-}
-async function returnToSolana(c, keypair, account, amount) {
-  const cash = await cashClient();
-  const quote = await quoteEscrowToSolana(account.address, keypair.publicKey.toBase58(), amount);
-  const summary = quoteSummary(quote);
-  log({ stage: "returning-to-solana", ...summary });
-  await executeFromEscrow(quote, c.walletClient);
-  const status = await waitForRelay(cash, summary.requestId);
-  return { ...summary, solanaTxs: status.txHashes };
-}
-const escrowAddress = (c) => c.getDeployedAddresses().escrowV2 ?? c.getDeployedAddresses().escrow;
-// Retries pre-broadcast simulation failures caused by RPC nodes lagging behind a just-mined block.
-async function retry(fn, tries = 8) {
-  let error;
-  for (let i = 0; i < tries; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      error = e;
-      await new Promise((r) => setTimeout(r, 1500));
-    }
-  }
-  throw error;
-}
-// Protected deposits require claimants to lock stake; PayHumans opens claims to any signed-in human.
-async function openClaims(c, id, platform) {
-  const escrow = escrowAddress(c);
-  const paymentMethod = getPaymentMethodsCatalog(ESCROW_CHAIN_ID, "production")[platform]?.paymentMethodHash;
-  if (!paymentMethod) throw new Error("Unsupported platform. Run payhumans platforms.");
-  if (!(await retry(() => c.isDisputeProtectionEnabled(escrow, id, paymentMethod)))) return "not enabled";
-  const hash = await retry(() => c.setDisputeProtectionEnabled({ escrow, depositId: id, paymentMethod, enabled: false }));
-  await receipt(c, hash);
-  return "disabled";
-}
-
-const program = new Command()
-  .name("payhumans")
-  .description("Fund verified fiat payment requests with Solana USDC. Writes preview by default.")
-  .version("0.2.0");
-
-program
-  .command("platforms")
-  .description("List supported deposit platforms and currencies")
-  .action(() => output({ asset: "Solana USDC", platforms: platforms() }));
-
-program
-  .command("wallet")
-  .description("Show the agent's Solana wallet and its PayHumans escrow account")
-  .action(async () => {
-    const { keypair, account, c, connection } = signer();
-    const [sol, escrow] = await Promise.all([
-      solanaBalances(connection, keypair.publicKey),
-      escrowBalances(c, account.address),
-    ]);
-    output({
-      solana: {
-        address: keypair.publicKey.toBase58(),
-        usdc: formatUnits(sol.usdc, 6),
-        sol: formatUnits(sol.lamports, 9),
-      },
-      escrowAccount: {
-        address: account.address,
-        usdc: formatUnits(escrow.usdc, 6),
-        networkFeeBalance: formatEther(escrow.gas),
-        note: "Derived from your Solana key. It owns your deposits; withdrawals return to Solana.",
-      },
-    });
+writeOptions(sourceOptions(deposits.command('open-claims'))).requiredOption('--id <id>').requiredOption('--platform <name>').action(async opts=>output(await openClaims(opts)));
+async function returnFunds(opts) {
+  let previous;
+  if(opts.yes && opts.operationId){try{previous=readOperation(opts.operationId);}catch(e){if(e.code!=="OPERATION_NOT_FOUND")throw e;}}
+  if(previous?.stage==="complete")return previous.result;
+  const original=fundingWallet(sourceRoute(opts));
+  if(!original.keypair) throw new Error('return currently supports Solana USDC destination. EVM withdrawals remain in your EVM wallet on Base; Bitcoin refund only applies to failed provider funding.');
+  const balance=(await baseBalances(original.account)).usdc, amount=previous?.routes?.return ? BigInt(previous.routes.return.input) : opts.amount?decimal(opts.amount,'amount'):balance;
+  if(!previous?.routes?.return && (amount<=0n || amount>balance)) throw new Error(`Base wallet holds ${formatUnits(balance,6)} USDC.`);
+  const slippageBps=Number(opts.slippageBps ?? 50);
+  if(!Number.isInteger(slippageBps)||slippageBps<0||slippageBps>100)throw new InvalidArgumentError('--slippage-bps must be an integer between 0 and 100.');
+  const cash=await fundingCash(slippageBps), client=await relayClient();
+  const quote=previous?.routes?.return?.quote ?? await client.actions.getQuote({chainId:8453,currency:ESCROW_USDC,toChainId:SOLANA_CHAIN_ID,toCurrency:SOLANA_USDC,user:original.account.address,recipient:original.address,amount:amount.toString(),tradeType:'EXACT_INPUT'},false);
+  const d=quote.details;
+  if(Number(d.currencyIn.currency.chainId)!==8453 || d.currencyIn.currency.address.toLowerCase()!==ESCROW_USDC.toLowerCase() || BigInt(d.currencyIn.amount)!==amount || Number(d.currencyOut.currency.chainId)!==SOLANA_CHAIN_ID || d.currencyOut.currency.address!==SOLANA_USDC || d.recipient!==original.address || d.sender.toLowerCase()!==original.account.address.toLowerCase()) throw new Error('Return quote identity mismatch.');
+  const min=BigInt(d.currencyOut.minimumAmount??d.currencyOut.amount), summary=quoteSummary(quote);
+  if(opts.minReceive && min<decimal(opts.minReceive,'min-receive')) throw new Error('Return minimum output is below --min-receive.');
+  if(!opts.yes)return{mode:'preview',amount:formatUnits(amount,6),minimumReceive:formatUnits(min,6),to:original.address,quote:summary,gasWarning:GAS_PREVIEW_NOTE,next:'Repeat with --min-receive, --operation-id and --yes.'};
+  if(!opts.minReceive)throw new InvalidArgumentError('--min-receive is required with --yes to bound return fees/slippage.');
+  return withWalletLock(original.account.address,async()=>{
+    const {yes,operationId,...request}=opts,op=openOperation(operationId,'return',request,original.account.address);
+    if(op.stage==='complete')return op.result;
+    if(!op.routes.return){op.routes.return={provider:'relay',input:amount.toString(),requestId:summary.requestId,quote,status:'quoted',summary};saveOperation(op);}
+    const base=evmClients(8453,original.account),wallet={...base,route:sourceRoute({sourceChain:'base',sourceAsset:'USDC'}),address:original.account.address,account:original.account};
+    await executeRelayRoute(op,'return',wallet,cash,{baseGas:decimal(opts.maxBaseGas,'max-base-gas',18)});
+    op.stage='complete';op.result={operationId,amount:formatUnits(BigInt(op.routes.return.input),6),route:op.routes.return.summary,status:op.routes.return.status};saveOperation(op);return op.result;
   });
-
-program
-  .command("return")
-  .description("Send USDC sitting in your escrow account back to your Solana wallet")
-  .option("--amount <usdc>", "USDC to return (defaults to the full balance)")
-  .option("--yes", "Sign and broadcast")
-  .action(async (opts) => {
-    const { keypair, account, c } = signer();
-    const balance = (await escrowBalances(c, account.address)).usdc;
-    const amount = opts.amount ? decimal(opts.amount, "amount") : balance;
-    if (amount <= 0n || amount > balance) throw new Error(`Escrow account holds ${formatUnits(balance, 6)} USDC.`);
-    if (!opts.yes) {
-      output({ mode: "preview", amount: formatUnits(amount, 6), to: keypair.publicKey.toBase58(), quote: quoteSummary(await quoteEscrowToSolana(account.address, keypair.publicKey.toBase58(), amount)) });
-      return;
-    }
-    await preflight(c);
-    output({ returned: formatUnits(amount, 6), route: await returnToSolana(c, keypair, account, amount) });
-  });
-
-const deposits = program
-  .command("deposit")
-  .description("Create and manage payment-request deposits");
-
-deposits
-  .command("create")
-  .description("Preview a deposit; --yes funds it from Solana USDC and creates it")
-  .requiredOption("--platform <name>", "Payment platform")
-  .requiredOption("--recipient <id>", "Recipient identifier accepted by the payment platform")
-  .requiredOption("--amount <usdc>", "USDC to escrow")
-  .requiredOption("--currency <code>", "Fiat currency")
-  .requiredOption("--rate <fiat-per-usdc>", "Fiat units the human sends per USDC received")
-  .option("--min <usdc>", "Minimum claim size (defaults to entire deposit)")
-  .option("--max <usdc>", "Maximum claim size (defaults to entire deposit)")
-  .option("--max-spend <usdc>", "Reject if total Solana USDC spent (deposit + route fees) would exceed this")
-  .option("--require-stake", "Keep dispute protection on; claimants must post stake to claim")
-  .option("--yes", "Sign and broadcast")
-  .action(async (opts) => {
-    const p = validateCreate(opts);
-    const preview = {
-      mode: opts.yes ? "execute" : "preview",
-      asset: "Solana USDC",
-      platform: p.platform,
-      recipient: p.recipient,
-      amount: formatUnits(p.amount, 6),
-      currency: p.currency,
-      fiatPerUsdc: formatUnits(p.rate, 18),
-      minimumClaim: formatUnits(p.min, 6),
-      maximumClaim: formatUnits(p.max, 6),
-      openToAllClaimants: !opts.requireStake,
-      note: "Your Solana USDC funds a Peer escrow. A human sends fiat to this recipient and receives the USDC after proof verification. Route fees are paid in Solana USDC; Solana network fees in SOL.",
-    };
-    const keypair = loadSolanaKeypair({ required: !!opts.yes });
-    if (!opts.yes && !keypair) {
-      output({ ...preview, next: "Set PAYHUMANS_SOLANA_KEY to see the funding quote, then repeat with --yes." });
-      return;
-    }
-    const account = escrowAccount(keypair);
-    const c = client(account);
-    const connection = solanaConnection();
-    const cash = await cashClient();
-    await preflight(c);
-    const [sol, escrow] = await Promise.all([
-      solanaBalances(connection, keypair.publicKey),
-      escrowBalances(c, account.address),
-    ]);
-    const bridgeAmount = p.amount > escrow.usdc ? p.amount - escrow.usdc : 0n;
-    const needsGas = escrow.gas < MIN_ESCROW_GAS;
-    const fundingQuote = bridgeAmount > 0n
-      ? await quoteSolanaUsdcToEscrow(cash, keypair, account.address, bridgeAmount)
-      : null;
-    const gasQuote = needsGas ? await quoteEscrowGas(keypair, account.address, ESCROW_GAS_TOPUP) : null;
-    const gasInput = gasQuote ? BigInt(gasQuote.details.currencyIn.amount) : 0n;
-    const totalSolanaUsdc = (fundingQuote?.inputAmount ?? 0n) + gasInput;
-    const plan = {
-      ...preview,
-      solanaWallet: keypair.publicKey.toBase58(),
-      escrowAccount: account.address,
-      solanaUsdcToSpend: formatUnits(totalSolanaUsdc, 6),
-      solanaUsdcBalance: formatUnits(sol.usdc, 6),
-      solBalance: formatUnits(sol.lamports, 9),
-      funding: fundingQuote ? quoteSummary(fundingQuote.raw) : "escrow account already holds the USDC",
-      networkFeeTopUp: gasQuote ? quoteSummary(gasQuote) : null,
-    };
-    if (opts.maxSpend && totalSolanaUsdc > decimal(opts.maxSpend, "max-spend"))
-      throw new Error(`Total Solana USDC ${formatUnits(totalSolanaUsdc, 6)} exceeds --max-spend.`);
-    if (!opts.yes) {
-      output({ ...plan, next: "Review these details, then repeat with --yes to fund and create the deposit." });
-      return;
-    }
-    if (sol.usdc < totalSolanaUsdc) throw new Error("Insufficient Solana USDC for this deposit and its route fees.");
-    if (totalSolanaUsdc > 0n && sol.lamports < MIN_SOL_LAMPORTS)
-      throw new Error("Keep at least 0.002 SOL for Solana network fees.");
-
-    let gasRoute = null;
-    if (gasQuote) {
-      const requestId = quoteSummary(gasQuote).requestId;
-      log({ stage: "network-fee-top-up", requestId });
-      const signatures = await executeFromSolana(gasQuote, keypair, connection, log);
-      await waitForRelay(cash, requestId);
-      gasRoute = { requestId, solanaSignatures: signatures };
-    }
-    let fundingRoute = null;
-    if (fundingQuote) {
-      // Quotes are short-lived; refresh right before signing.
-      const fresh = await quoteSolanaUsdcToEscrow(cash, keypair, account.address, bridgeAmount);
-      log({ stage: "funding-from-solana", requestId: fresh.requestId, ...quoteSummary(fresh.raw) });
-      const signatures = await executeFromSolana(fresh.raw, keypair, connection, log);
-      const status = await waitForRelay(cash, fresh.requestId);
-      fundingRoute = { requestId: fresh.requestId, solanaSignatures: signatures, escrowTxs: status.txHashes };
-    }
-    const funded = await escrowBalances(c, account.address);
-    if (funded.usdc < p.amount) throw new Error("Escrow account USDC did not arrive. Check the Relay request before retrying.");
-
-    const params = {
-      token: ESCROW_USDC,
-      amount: p.amount,
-      intentAmountRange: { min: p.min, max: p.max },
-      processorNames: [p.platform],
-      payeeData: [{ offchainId: p.recipient }],
-      conversionRates: [[{ currency: p.currency, conversionRate: p.rate.toString() }]],
-    };
-    // Resolve and validate the recipient before approving funds. Send the exact prepared calldata once.
-    const prepared = await c.prepareCreateDeposit(params);
-    const spender = escrowAddress(c);
-    const { to, data, value } = prepared.prepared;
-    if (to.toLowerCase() !== spender.toLowerCase() || (value ?? 0n) !== 0n)
-      throw new Error("Unexpected deposit contract or value.");
-    const approval = await c.ensureAllowance({ token: ESCROW_USDC, spender, amount: p.amount, maxApprove: false });
-    if (approval.hash) {
-      await receipt(c, approval.hash);
-      // Load-balanced RPCs can serve a stale allowance right after the approval lands.
-      for (let i = 0; i < 20; i++) {
-        const allowance = await c.publicClient.readContract({ address: ESCROW_USDC, abi: erc20Abi, functionName: "allowance", args: [account.address, spender] });
-        if (allowance >= p.amount) break;
-        await new Promise((r) => setTimeout(r, 1500));
-      }
-    }
-    await c.publicClient.call({ account, to, data, value: 0n });
-    const hash = await c.walletClient.sendTransaction({ to, data, value: 0n });
-    log({ stage: "deposit-submitted", transactionHash: hash });
-    const confirmed = await receipt(c, hash);
-    const logs = await c.publicClient.getTransactionReceipt({ hash });
-    const abi = getContracts(ESCROW_CHAIN_ID, "production").abis.escrowV2 ?? getContracts(ESCROW_CHAIN_ID, "production").abis.escrow;
-    const id = parseEventLogs({ abi, logs: logs.logs, strict: false }).find((e) => e.eventName === "DepositReceived")?.args?.depositId;
-
-    let disputeProtection = "unchanged";
-    if (id !== undefined && !opts.requireStake) {
-      try {
-        disputeProtection = await openClaims(c, id, p.platform);
-      } catch (error) {
-        disputeProtection = `still enabled; run payhumans deposit open-claims --id ${id} --platform ${p.platform} --yes (${safeError(error)})`;
-      }
-    }
-    output({
-      ...plan,
-      gasRoute,
-      fundingRoute,
-      ...confirmed,
-      depositId: id?.toString() ?? null,
-      disputeProtection,
-      claimUrl: id !== undefined ? `https://payhumans.ai/earn?deposit=${id}` : null,
-    });
-  });
-
-deposits
-  .command("open-claims")
-  .description("Let any signed-in human claim a deposit without posting stake (turns off dispute protection)")
-  .requiredOption("--id <id>", "Deposit ID")
-  .requiredOption("--platform <name>", "Payment platform of the deposit")
-  .option("--yes", "Sign and broadcast")
-  .action(async (opts) => {
-    const id = depositId(opts.id);
-    const platform = opts.platform.toLowerCase();
-    if (!opts.yes) {
-      output({ mode: "preview", depositId: id, platform, note: "Disables dispute protection so claimants need no stake. The agent accepts payment-reversal risk." });
-      return;
-    }
-    const { account, c } = signer();
-    await preflight(c);
-    const d = await c.getDeposit(id);
-    if (d.deposit.depositor.toLowerCase() !== account.address.toLowerCase())
-      throw new Error("Your escrow account does not own this deposit.");
-    output({ depositId: id, platform, disputeProtection: await openClaims(c, id, platform) });
-  });
-
-deposits
-  .command("show")
-  .argument("<id>", "Deposit ID")
-  .action(async (id) => output(await client().getDeposit(depositId(id))));
-
-deposits
-  .command("list")
-  .option("--owner <address>", "Escrow account (defaults to the one derived from your Solana key)")
-  .action(async (opts) => {
-    const owner = opts.owner ?? escrowAccount(loadSolanaKeypair()).address;
-    if (!isAddress(owner)) throw new Error("Invalid owner address.");
-    output(await client().getAccountDeposits(owner));
-  });
-
-deposits
-  .command("withdraw")
-  .description("Withdraw unclaimed USDC and return it to your Solana wallet")
-  .requiredOption("--id <id>", "Deposit ID")
-  .option("--amount <usdc>", "Available USDC to withdraw (defaults to closing the deposit)")
-  .option("--keep-in-escrow-account", "Leave withdrawn USDC in the escrow account for the next deposit")
-  .option("--yes", "Sign and broadcast")
-  .action(async (opts) => {
-    const id = depositId(opts.id);
-    const amount = opts.amount ? decimal(opts.amount, "amount") : null;
-    if (!opts.yes) {
-      output({
-        mode: "preview",
-        depositId: id,
-        amount: amount ? formatUnits(amount, 6) : "all available",
-        returnTo: opts.keepInEscrowAccount ? "escrow account" : "Solana wallet",
-        note: "Withdraw available funds to the deposit owner. Reserved funds cannot be withdrawn.",
-      });
-      return;
-    }
-    const { keypair, account, c } = signer();
-    await preflight(c);
-    const d = await c.getDeposit(id);
-    if (d.deposit.depositor.toLowerCase() !== account.address.toLowerCase())
-      throw new Error("Your escrow account does not own this deposit.");
-    if (amount && d.availableLiquidity < amount)
-      throw new Error("Insufficient available liquidity; claimed funds are reserved.");
-    const hash = amount
-      ? await c.removeFunds({ depositId: id, amount })
-      : await c.withdrawDeposit({ depositId: id });
-    log({ stage: "withdraw-submitted", transactionHash: hash });
-    const withdrawn = await receipt(c, hash);
-    const released = await usdcReceived(c, hash, account.address);
-    const returnRoute =
-      !opts.keepInEscrowAccount && released > 0n
-        ? await retry(() => returnToSolana(c, keypair, account, released), 3)
-        : null;
-    output({ ...withdrawn, released: formatUnits(released, 6), returnRoute });
-  });
-
-program.parseAsync().catch((error) => {
-  console.error(json({ error: safeError(error) }));
-  process.exitCode = 1;
+}
+writeOptions(sourceOptions(program.command('return').description('Route Base USDC back to the same Solana wallet'))).option('--amount <usdc>').option('--min-receive <usdc>', 'Minimum Solana USDC out, REQUIRED with --yes').option('--slippage-bps <bps>','0–100','50').action(async opts=>output(await returnFunds(opts)));
+program.parseAsync().catch(error=>{
+  if(error.code==='commander.helpDisplayed'||error.code==='commander.version')return;
+  if(!String(error.code??'').startsWith('commander.'))process.stderr.write(`${json(errorOutput(error))}\n`);
+  process.exitCode=1;
 });

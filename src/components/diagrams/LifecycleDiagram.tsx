@@ -1,84 +1,81 @@
-import { AgentIcon, EscrowIcon, HumanIcon, RecipientIcon } from "./Icons";
-
-type Tone = "usdc" | "fiat" | "proof" | "neutral";
-
 const lanes = [
-  { key: "agent", label: "Agent", Icon: AgentIcon },
-  { key: "escrow", label: "Escrow", Icon: EscrowIcon },
-  { key: "human", label: "Human", Icon: HumanIcon },
-  { key: "recipient", label: "Recipient", Icon: RecipientIcon },
+  { key: "agent", label: "Agent", human: false },
+  { key: "escrow", label: "Escrow", human: false },
+  { key: "person", label: "Person", human: true },
+  { key: "recipient", label: "Recipient", human: true },
 ] as const;
 
 type LaneKey = (typeof lanes)[number]["key"];
 
-const steps: { title: string; cells: Partial<Record<LaneKey, { text: string; tone: Tone }>> }[] = [
+const steps: { title: string; cells: Partial<Record<LaneKey, string>> }[] = [
   {
-    title: "Request",
+    title: "Fund",
     cells: {
-      agent: { text: "Creates request: recipient, platform, amount, rate", tone: "neutral" },
-      escrow: { text: "USDC locked, request open", tone: "usdc" },
+      agent: "Creates the order: recipient, platform, amount, rate",
+      escrow: "USDC locked. Order is open.",
     },
   },
   {
     title: "Claim",
     cells: {
-      human: { text: "Claims on /earn with a wallet", tone: "neutral" },
-      escrow: { text: "Onchain intent created, timer starts", tone: "neutral" },
+      person: "Claims some or all of it in the Peer app",
+      escrow: "That amount is reserved. The claim's clock starts.",
     },
   },
   {
     title: "Pay",
     cells: {
-      human: { text: "Sends fiat from own account", tone: "fiat" },
-      recipient: { text: "Receives fiat", tone: "fiat" },
+      person: "Sends fiat from their own account",
+      recipient: "Receives the fiat",
     },
   },
   {
     title: "Prove",
     cells: {
-      human: { text: "Generates proof with the verification extension", tone: "proof" },
-      escrow: { text: "Checks proof against the request", tone: "proof" },
+      person: "Verifies the payment in the app",
+      escrow: "Checks the proof against the claim",
     },
   },
   {
-    title: "Settle",
+    title: "Release",
     cells: {
-      escrow: { text: "Releases USDC to the human", tone: "usdc" },
-      agent: { text: "Sees request fulfilled via status", tone: "neutral" },
+      escrow: "Releases the reserved USDC to the person",
+      agent: "Sees the claim as fulfilled in status",
     },
   },
 ];
 
+/* Who does what, in order. Pen-tinted cells are a person's actions. */
 export default function LifecycleDiagram() {
   return (
-    <figure className="diagram-frame">
-      <div className="overflow-x-auto -mx-2 px-2 pb-2">
+    <figure className="figure">
+      <div className="overflow-x-auto -mx-1 px-1 pb-1">
         <div
-          className="grid min-w-[760px] gap-px rounded-xl overflow-hidden bg-white/[0.05]"
-          style={{ gridTemplateColumns: `120px repeat(${steps.length}, minmax(0, 1fr))` }}
+          className="lanes"
+          style={{ gridTemplateColumns: `112px repeat(${steps.length}, minmax(0, 1fr))` }}
           role="table"
-          aria-label="Request lifecycle by participant"
+          aria-label="Order lifecycle by participant"
         >
           <div role="row" className="contents">
             <div role="columnheader" className="lane-head" />
             {steps.map((s, i) => (
               <div key={s.title} role="columnheader" className="lane-head">
-                <span className="font-mono text-[10px] text-[var(--muted)]">0{i + 1}</span>
-                <span className="text-[13px] font-semibold text-[var(--fg)]">{s.title}</span>
+                <span className="font-mono text-[10.5px] text-ink-3">{i + 1}</span>
+                <span className="block text-[13.5px] font-semibold">{s.title}</span>
               </div>
             ))}
           </div>
-          {lanes.map(({ key, label, Icon }) => (
-            <div key={key} role="row" className="contents">
-              <div role="rowheader" className="lane-label">
-                <Icon size={16} />
-                {label}
+          {lanes.map((lane) => (
+            <div key={lane.key} role="row" className="contents">
+              <div role="rowheader" className="lane-name">
+                <span className={lane.human ? "ci" : "sq"} aria-hidden="true" />
+                {lane.label}
               </div>
               {steps.map((s) => {
-                const cell = s.cells[key];
+                const cell = s.cells[lane.key];
                 return (
-                  <div key={s.title} role="cell" className="lane-cell">
-                    {cell ? <div className={`lane-chip tone-${cell.tone}`}>{cell.text}</div> : null}
+                  <div key={s.title} role="cell" className={`lane-cell ${cell ? (lane.human ? "is-human" : "is-machine") : ""}`}>
+                    {cell}
                   </div>
                 );
               })}
@@ -86,11 +83,6 @@ export default function LifecycleDiagram() {
           ))}
         </div>
       </div>
-      <figcaption className="dg-legend">
-        <span><i style={{ background: "#60a5fa" }} /> USDC moves</span>
-        <span><i style={{ background: "#4ade80" }} /> Fiat moves</span>
-        <span><i style={{ background: "#c4b5fd" }} /> Proof</span>
-      </figcaption>
     </figure>
   );
 }

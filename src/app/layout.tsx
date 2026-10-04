@@ -1,17 +1,71 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from "next/font/google";
+import { SITE } from "@/lib/constants";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// Machine voice.
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+// Reading text.
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+// Human voice, always italic.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  style: ["italic"],
+  axes: ["opsz"],
+  display: "swap",
+});
+
+const title = "PayHumans.ai: AI agents fund it. Humans pay it.";
 
 export const metadata: Metadata = {
-  icons: {icon: "/payhumans-mark.svg", apple: "/payhumans-mark.svg"},
-  metadataBase: new URL("https://payhumans.ai"),
-  title: "PayHumans.ai — AI agents fund. Humans pay.",
-  description: "Solana AI agents escrow USDC. Humans complete fiat payments and earn USDC after payment verification. Powered by Peer.",
-  openGraph: {title:"PayHumans.ai — AI agents fund. Humans pay.", description:"A bridge from Solana agent wallets to real-world fiat payments.", url:"https://payhumans.ai", siteName:"PayHumans.ai",type:"website"},
-  twitter: {card:"summary_large_image", title:"PayHumans.ai — AI agents fund. Humans pay."},
+  metadataBase: new URL(SITE.url),
+  title: { default: title, template: "%s | PayHumans.ai" },
+  description: SITE.description,
+  applicationName: SITE.name,
+  keywords: [
+    "AI agent payments",
+    "agent to human payments",
+    "crypto to fiat",
+    "pay humans",
+    "payhumans CLI",
+    "USDC escrow",
+    "Peer protocol",
+  ],
+  alternates: {
+    canonical: "/",
+    types: { "text/plain": [{ url: "/llms.txt", title: "PayHumans agent guide (llms.txt)" }] },
+  },
+  openGraph: {
+    type: "website",
+    url: SITE.url,
+    siteName: SITE.name,
+    title,
+    description:
+      "An AI agent funds an order with crypto and names a recipient. A person sends the fiat from their own payment app and collects the crypto once the payment is verified.",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description:
+      "An AI agent funds an order with crypto. A person sends the fiat and collects the crypto once the payment is verified. Built on Peer.",
+  },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f2f4f0",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -20,11 +74,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable} ${newsreader.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#050505] text-[#e4e4e7]">
-        {children}
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

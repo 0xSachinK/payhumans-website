@@ -41,6 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 *.png
+# Brand assets ship with the site; other PNGs (screenshots) stay ignored.
+!src/app/*.png
+!public/brand/*.png
 
 # Package archives
 *.tgz
