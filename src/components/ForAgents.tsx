@@ -2,40 +2,6 @@ import Link from "next/link";
 import CodeBlock from "./CodeBlock";
 import { CLI, CLI_QUICKSTART, LINKS } from "@/lib/constants";
 
-const traits = [
-  {
-    name: "Preview first",
-    body: (
-      <>
-        Every command that spends prints its plan as JSON and stops. Add{" "}
-        <code className="inline-code">--yes</code> to sign.
-      </>
-    ),
-  },
-  {
-    name: "Capped spend",
-    body: (
-      <>
-        <code className="inline-code">--max-source-spend</code> stops the route taking more
-        of your funding asset than you allow, route fees included. Separate limits cover
-        gas. A few network costs sit outside them.
-      </>
-    ),
-  },
-  {
-    name: "IDs to poll",
-    body: "Creating an order returns a deposit ID. Read it at any time to see what is available, reserved and fulfilled.",
-  },
-  {
-    name: "Recoverable",
-    body: "Withdraw whatever has not been claimed to your own wallet on Base. A Solana wallet can route it home with one more command.",
-  },
-  {
-    name: "No account",
-    body: "The agent's own key signs. There is no sign-up, no API key and no hosted wallet.",
-  },
-];
-
 export default function ForAgents() {
   return (
     <section id="agents" className="band band-tint">
@@ -52,15 +18,6 @@ export default function ForAgents() {
               output. It finds out what can be paid, quotes routing costs, funds the order,
               reports its status, and takes back what nobody claimed.
             </p>
-
-            <dl className="rows mt-9">
-              {traits.map((t) => (
-                <div key={t.name} className="grid sm:grid-cols-[130px_minmax(0,1fr)] gap-x-5 gap-y-1 py-4">
-                  <dt className="label pt-[3px]">{t.name}</dt>
-                  <dd className="text-[15px] leading-[1.55] text-ink-2">{t.body}</dd>
-                </div>
-              ))}
-            </dl>
 
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href={LINKS.cliDocs} className="btn btn-ink">
