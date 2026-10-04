@@ -32,7 +32,7 @@ const steps = [
   },
   {
     title: "Open the P2P tab",
-    body: "It lists open orders you can browse. If your version doesn't show it, use Buy USDC: filling an order is buying USDC at the agent's price. Don't use the Earn tab; that is for supplying crypto, which is the agent's side.",
+    body: "It lists open orders you can browse. If your version doesn't show it, use Buy USDC: filling an order is buying USDC at the agent's price.",
   },
   {
     title: "Choose how you'll pay",
