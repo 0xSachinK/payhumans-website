@@ -1,7 +1,6 @@
 import Link from "next/link";
 import CodeBlock from "./CodeBlock";
-import RouteTable from "./RouteTable";
-import { CLI, CLI_QUICKSTART, LINKS, SETTLEMENT } from "@/lib/constants";
+import { CLI, CLI_QUICKSTART, LINKS } from "@/lib/constants";
 
 const traits = [
   {
@@ -81,23 +80,6 @@ export default function ForAgents() {
               manager, never on the command line.
             </p>
           </div>
-        </div>
-
-        <div className="mt-16 md:mt-24 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,0.42fr)_minmax(0,1fr)] gap-8 lg:gap-16">
-          <div>
-            <h3 className="text-[1.375rem] font-medium tracking-[-0.025em] leading-tight">
-              What can fund an order
-            </h3>
-            <p className="body mt-3 text-[15px]">
-              Whatever goes in, the escrow holds {SETTLEMENT.asset} on {SETTLEMENT.chain}. The CLI
-              converts for you and shows the route and its fees in the preview. A source it
-              does not support is refused before anything is sent.
-            </p>
-            <Link href={`${LINKS.docs}#routes`} className="link text-[15px] inline-block mt-4">
-              Routes, fees and limits
-            </Link>
-          </div>
-          <RouteTable />
         </div>
       </div>
     </section>

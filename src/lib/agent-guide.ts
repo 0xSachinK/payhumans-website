@@ -135,7 +135,7 @@ Results are JSON on stdout. Errors are JSON on stderr with a non-zero exit code.
 ## Optional
 
 - [npm package](${LINKS.npm}): ${CLI.packageName}
-- [Project status](${abs("/docs#project")}): what has and has not been verified with real funds.
+- [About PayHumans](${abs("/docs#project")}): project background and the infrastructure it uses.
 - [Peer](${LINKS.peer}): the protocol that provides escrow, payment verification and the mobile app.
 - [Peer docs](${LINKS.peerDocs})
 `;

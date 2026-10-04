@@ -3,7 +3,6 @@ import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
 import ForAgents from "@/components/ForAgents";
 import ForHumans from "@/components/ForHumans";
-import VerifiedLedger from "@/components/VerifiedLedger";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import { CLI, FAQ as faq, LINKS, SITE } from "@/lib/constants";
@@ -56,11 +55,6 @@ export default function Home() {
         <HowItWorks />
         <ForAgents />
         <ForHumans />
-        <section className="band band-tint">
-          <div className="wrap">
-            <VerifiedLedger />
-          </div>
-        </section>
         <FAQ />
       </main>
       <Footer />

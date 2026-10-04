@@ -4,7 +4,6 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import CodeBlock, { InstallChip } from "@/components/CodeBlock";
 import RouteTable, { RouteLegend } from "@/components/RouteTable";
-import VerifiedLedger from "@/components/VerifiedLedger";
 import FundingRouteDiagram from "@/components/diagrams/FundingRouteDiagram";
 import BalanceDiagram from "@/components/diagrams/BalanceDiagram";
 import LifecycleDiagram from "@/components/diagrams/LifecycleDiagram";
@@ -79,7 +78,7 @@ const toc = [
     part: "Reference",
     items: [
       { id: "verification", label: "Verification limits" },
-      { id: "project", label: "Project status" },
+      { id: "project", label: "About PayHumans" },
       { id: "machine-readable", label: "For machines" },
     ],
   },
@@ -895,15 +894,7 @@ export default function DocsPage() {
             </section>
 
             <section id="project" className="docs-section">
-              <h2>Project status</h2>
-              <p>
-                PayHumans is new. This is what has run with real funds and what has not.
-                Start with small amounts.
-              </p>
-              <div className="mt-6">
-                <VerifiedLedger heading={false} />
-              </div>
-              <h3>What is and is not PayHumans</h3>
+              <h2>About PayHumans</h2>
               <p>
                 PayHumans.ai is an independent project. It began as a website prototype on
                 March 27, 2026. The CLI, the live escrow integration and this site were
